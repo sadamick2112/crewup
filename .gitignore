@@ -23,6 +23,10 @@
 hs_err_pid*
 replay_pid*
 
+# Maven build output; keep the wrapper jar despite *.jar above
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
 # Private source notes (not published)
 CrewUp App.docx
 

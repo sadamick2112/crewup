@@ -1,6 +1,6 @@
 # CrewUp — Product Requirements
 
-**Status:** Draft v0.1 · October 6, 2026 · Source: "CrewUp App" OneNote page (Shawn Adamick)
+**Status:** Draft v0.2 · October 13, 2026 (open questions resolved, see §9) · Source: "CrewUp App" OneNote page (Shawn Adamick)
 **Decisions already made:** React web client first (mobile later) · Spring Boot modular monolith · MVP = core logging + one AI feature (board game lookup)
 
 ---
@@ -22,6 +22,8 @@ Friend groups that have met for years build up thousands of shared memories that
 - Payments, ticket purchasing, or bill splitting
 - Native mobile apps (planned after the web MVP)
 - Group chat or messaging
+- Importing past history (spreadsheets, photos). History is entered manually; the demo uses generated seed data.
+- Commercial use. CrewUp is a non-commercial portfolio project; third-party API terms (BGG, TMDB, places) are checked for non-commercial use only. Revisit them if this changes.
 
 ## 2. Users and roles
 
@@ -29,7 +31,7 @@ Friend groups that have met for years build up thousands of shared memories that
 |---|---|
 | **Administrator** | Creates and manages the group, members, and roles. Usually the group's organizer. |
 | **Friend** | A regular member who plans and logs activities. |
-| **New Guy** | A newly invited member with read-only access until promoted. |
+| **New Guy** | A newly invited member with mostly read-only access until promoted. Can add their own ratings and notes on Activities they attended, but can't see members' contact info. |
 | **Historical member** | Someone in the group's history who has no account (moved away, not tech-savvy, or deceased). They still appear in attendee lists. |
 
 > **Modeling change:** The original document combines "Person" with the login identity. This spec separates the **User** (a login account) from the **Member** (a person's profile within one group). This allows historical members without accounts, lets one User belong to several groups, and assigns roles per group. See §7.
@@ -54,7 +56,7 @@ Each requirement below is tagged **[MVP]**, **[P2]**, or **[P3]**.
 | **Event** | A get-together on a date, containing one or more Activities. Example: "Boy's Night, Oct 6, 2026". |
 | **Activity** | One thing done during an Event, such as dinner or a board game night. It has a type, a start time, attendees, and a log. |
 | **Activity Type** | A plug-in module (Dining Out, Board Gaming, Movies) that defines the Activity's specialized details, UI, and AI features. |
-| **Catalog item** | A reusable reference record owned by an Activity Type, such as a Restaurant, Board Game, Host, Cinema, or Movie. |
+| **Catalog item** | A reusable reference record owned by an Activity Type, such as a Restaurant, Board Game, Host, Cinema, or Movie. Catalogs are per group; nothing is shared across groups. |
 
 ## 5. Functional requirements
 
@@ -77,7 +79,7 @@ Each requirement below is tagged **[MVP]**, **[P2]**, or **[P3]**.
 - **MEM-1 [MVP]** Administrators can add a Member without an account (historical member), with at least a first name.
 - **MEM-2 [MVP]** Member profile fields (see §7 for types): first name, last name, nickname, pronouns (optional), picture, joined date, birthday (month and day required, year optional), mobile phone, email, social links (list), status (active/inactive), food preferences, and favorites (music, video games, board games).
 - **MEM-3 [MVP]** Members can edit their own profile. Administrators can edit any profile.
-- **MEM-4 [MVP]** Contact fields (phone, email, birthday year) are visible only to members of the same group.
+- **MEM-4 [MVP]** Contact fields (phone, email, birthday year) are visible only to Administrators and Friends of the same group. New Guys don't see them until promoted. A Member always sees their own contact fields.
 - **MEM-5 [MVP]** Inactive members still appear in history, but are sorted to the bottom of attendee pickers and excluded from alerts.
 - **MEM-6 [P2]** Food preferences are structured, not free text:
   - Cuisine sentiments: a list of (cuisine, LOVE/LIKE/DISLIKE/HATE)
@@ -93,11 +95,12 @@ Each requirement below is tagged **[MVP]**, **[P2]**, or **[P3]**.
 | Action | Administrator | Friend | New Guy |
 |---|---|---|---|
 | View group, members, events, history | ✓ | ✓ | ✓ |
+| View members' contact info (MEM-4) | ✓ | ✓ | — |
 | Create or edit Events and Activities | ✓ | ✓ | — |
 | Edit or delete any Event or Activity | ✓ | Own only | — |
-| Add own rating, dishes, or notes on an attended Activity | ✓ | ✓ | ✓ *(proposed)* |
+| Add own rating, dishes, or notes on an attended Activity | ✓ | ✓ | ✓ |
 | Manage catalog (restaurants, games, hosts) | ✓ | ✓ | — |
-| Invite members | ✓ | ✓ *(proposed)* | — |
+| Invite members (always joined as New Guy, INV-2) | ✓ | ✓ | — |
 | Change roles, remove members, edit group | ✓ | — | — |
 
 - **ROL-3 [P2]** Permissions can be overridden per Activity Type. For example, New Guys could log board game scores but not create dinners. This implements "privileges based on the activity" from the original document.
@@ -168,6 +171,7 @@ This addresses the core pain point: "everything blends together."
 - **BG-5 [MVP]** Add a Board Game manually or through AI lookup (AI-1).
 - **BG-6 [MVP]** Win statistics: a bar chart of first-place finishes by Member for a selected game, filterable by date range. Also show games played and win rate.
 - **BG-7 [P2] AI game suggestions:** See AI-7.
+- **BG-8 [P2]** Game ownership: record which Members own each Board Game (zero or more owners). A game's page lists its owners, and a Member's profile lists the games they own. AI-7 uses this.
 
 ### 5.13 Movies Activity Type [P2]
 
@@ -185,6 +189,7 @@ General rules for all AI features:
 - **AI-0b** Each AI feature shows where the data came from (source links).
 - **AI-0c** Every AI feature has a non-AI fallback (manual entry), so the app works if AI is unavailable or over budget.
 - **AI-0d** There is a per-group monthly AI budget with graceful degradation when it runs out.
+- **AI-0e [MVP]** The LLM provider is configurable per deployment: Claude (default) or a local model served by Ollama. Switching providers requires no code changes.
 
 | ID | Phase | Feature | Notes |
 |---|---|---|---|
@@ -194,13 +199,13 @@ General rules for all AI features:
 | **AI-4** | P2 | **Movie lookup:** Type a title and pick from matches | Use the TMDB or OMDb API. Scraping IMDb violates IMDb's terms, and IMDb has no free public API. |
 | **AI-5** | P3 | **Showtime lookup** for a selected Cinema | High risk: there is no reliable free showtimes API. Prototype first. |
 | **AI-6** | P3 | **Event timing:** For a movie + dinner Event, project the movie's end time (runtime plus about 30 minutes of previews) and travel time, and suggest restaurants open within a radius. Offer to drop the dinner if it's too late. | Needs AI-2, AI-3, AI-4, and a routing API. |
-| **AI-7** | P2 | **Board game suggestions:** Given the player count and time available, suggest owned or played games that fit, with projected end time | |
+| **AI-7** | P2 | **Board game suggestions:** Given the player count and time available, suggest owned (BG-8) or played games that fit, with projected end time | |
 
 ## 6. Non-functional requirements
 
 | ID | Requirement |
 |---|---|
-| **NFR-1 Privacy** | All data is scoped to one group. No cross-group visibility. Contact info is visible to group members only. |
+| **NFR-1 Privacy** | All data is scoped to one group. No cross-group visibility. Contact info is visible to the group's Administrators and Friends only (MEM-4). |
 | **NFR-2 Security** | OIDC authentication. Group-scoped authorization is checked on every request. OWASP Top 10 is addressed. Secrets are never stored in the repo. |
 | **NFR-3 Responsiveness** | Mobile-first responsive UI, usable at a 360 px width. Installable as a PWA. |
 | **NFR-4 Accessibility** | WCAG 2.2 AA: keyboard navigable, sufficient contrast, labeled controls. |
@@ -242,6 +247,7 @@ IDs are UUIDs (v7, which sorts by time). Every table carries `group_id` (except 
 - **BoardGamingDetail:** activity_id, host_id, duration_hours
 - **GameSession:** id, activity_id, board_game_id, starts_at, expansions[], notes, duration_hours
 - **GameSessionPlayer:** session_id, member_id, score (nullable), placement (nullable; ties allowed), team (nullable)
+- **BoardGameOwner [P2]:** board_game_id, member_id
 
 **Movies module [P2]**
 - **Cinema:** id, group_id, name, address fields, lat/lng, phone, website_url
@@ -264,12 +270,20 @@ IDs are UUIDs (v7, which sorts by time). Every table carries `group_id` (except 
 | IMDb search or scrape | TMDB or OMDb API | IMDb's terms prohibit scraping, and it has no free API |
 | Each Activity Type as a microservice | Modules in a modular monolith, extractable later | See `architecture.md` ADR-001 |
 
-## 9. Open questions
+## 9. Resolved questions
 
-1. Can a **New Guy** add their own ratings and dish notes for an Activity they attended? (Proposed: yes.)
-2. Can **Friends** send invites, or only Administrators? (Proposed: yes, as New Guy only.)
-3. Are catalogs **per group or shared** across all groups? (Proposed: per group for the MVP. A shared catalog raises moderation issues.)
-4. Should **New Guys** see members' contact info?
-5. **Board game ownership:** Should the app track who owns which games (useful for AI-7 suggestions)?
-6. **Seed data:** Will you import past history (for example, from spreadsheets or photos)? If so, an import feature belongs in Phase 2.
-7. **Commercial intent:** If CrewUp may become a paid app, BGG, TMDB, and places APIs each have commercial-use terms to check before relying on them.
+All resolved on October 13, 2026.
+
+| # | Question | Decision | Reflected in |
+|---|---|---|---|
+| 1 | Can a **New Guy** add their own ratings and dish notes for an Activity they attended? | Yes | §2, ROL-2 |
+| 2 | Can **Friends** send invites, or only Administrators? | Yes. Invitees always join as New Guy. | ROL-2, INV-2 |
+| 3 | Are catalogs **per group or shared** across all groups? | Per group. A shared catalog raises moderation issues. | §4 Catalog item, §7 |
+| 4 | Should **New Guys** see members' contact info? | No, not until promoted | MEM-4, ROL-2, NFR-1 |
+| 5 | Should the app track **board game ownership** (useful for AI-7)? | Yes, in Phase 2 alongside AI-7 | BG-8, AI-7, §7 BoardGameOwner |
+| 6 | Will past history be **imported** (spreadsheets, photos)? | No. No import feature is planned. | §1 Non-goals |
+| 7 | Is there **commercial intent** (affects BGG, TMDB, places API terms)? | Not yet. Treat as non-commercial; revisit API terms if that changes. | §1 Non-goals |
+
+## 10. Open questions
+
+None at the moment.

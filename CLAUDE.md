@@ -20,7 +20,7 @@ A shared memory log for long-running friend groups: plan get-togethers, log acti
 
 ## Stack
 
-Backend: Java 25, Spring Boot, Spring Modulith, Spring Data JPA, Flyway, PostgreSQL, Spring Security (OIDC resource server), Spring AI (Claude).
+Backend: Java 25, Spring Boot, Spring Modulith, Spring Data JPA, Flyway, PostgreSQL, Spring Security (OIDC resource server), Spring AI (Claude by default; local LLM via Ollama as a configurable alternative).
 Frontend: React, TypeScript, Vite, React Router, TanStack Query, Tailwind CSS + shadcn/ui, React Hook Form + Zod, Recharts.
 Testing: JUnit 5, Testcontainers, Modulith tests, Vitest, React Testing Library, MSW, Playwright.
 
@@ -28,7 +28,7 @@ Testing: JUnit 5, Testcontainers, Modulith tests, Vitest, React Testing Library,
 
 <!-- Fill these in during Milestone 0 -->
 - Start dependencies: `docker compose up -d`
-- Backend: `./gradlew bootRun` · test: `./gradlew test`
+- Backend (Maven, via the wrapper): `./mvnw spring-boot:run` · test: `./mvnw test` · full build with integration tests: `./mvnw verify`
 - Frontend: `npm run dev` · test: `npm test` · lint: `npm run lint`
 - Regenerate API client: `npm run gen:api`
 - End-to-end tests: `npm run e2e`
@@ -36,7 +36,7 @@ Testing: JUnit 5, Testcontainers, Modulith tests, Vitest, React Testing Library,
 ## Conventions
 
 - Java packages: `app.crewup.<module>`. Module internals go in `internal` subpackages. Expose only what other modules need.
-- Tables are prefixed per module (`dining_`, `bg_`, `mov_`). One Flyway folder per module.
+- Activity Type tables are prefixed with the module name (`dining_`, `boardgames_`, `movies_`). One Flyway folder per module.
 - IDs are UUID v7. Store instants as `timestamptz`, with the IANA zone on Event.
 - Errors use RFC 9457 Problem Details.
 - Frontend: new Activity Types go in `src/activity-types/<type>/` and register in `registry.ts`. Server state uses TanStack Query only.

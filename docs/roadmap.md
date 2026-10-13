@@ -15,14 +15,14 @@ Each milestone is a vertical slice (database → API → UI → tests) that ends
 | **M4** | **Dining Out:** restaurants, reviews, dishes, restaurant history page | DIN-1…5, MEM-T3 | First real Activity Type plug-in. **Write the `new-activity-type` skill after this.** |
 | **M5** | **Board Gaming:** hosts, games, sessions, placements, win chart | BG-1…6 | Second plug-in (built with the skill), charts |
 | **M6** | **Timeline and search:** filters, full-text search | MEM-T1…2 | Postgres full-text search, list UX |
-| **M7** | **AI-1 board game lookup:** Spring AI, tool calling, structured output, caching, budget, eval set | AI-0a…d, AI-1, NFR-10 | Applied AI engineering |
+| **M7** | **AI-1 board game lookup:** Spring AI, tool calling, structured output, caching, budget, eval set, Claude or local LLM (Ollama) | AI-0a…e, AI-1, NFR-10 | Applied AI engineering, comparing hosted and local models |
 | **M8** | **Ship it:** hosting, seed demo group, Playwright smoke tests, README with screenshots, architecture diagram, and a "How I built this with Claude Code" section | NFR-* | Deployment, telling the portfolio story |
 
 **Suggested order of adding Claude Code features:** `CLAUDE.md` (M0) → plan mode on every milestone → `code-reviewer` subagent (M2) → `spec-feature` skill (M3) → `new-activity-type` skill (after M4) → hooks for formatting and tests (M5) → `test-writer` subagent (M6).
 
 ## Phase 2
 
-Photos (PHO-1) · alerts (SOC-1…3) · Movies (MOV-1…3) · AI-2 restaurant lookup · AI-3 recommendations · AI-4 movie lookup · AI-7 game suggestions · email invites (INV-4) · "On this day" (MEM-T4) · structured food preferences (MEM-6) · per-type permissions (ROL-3) · account deletion (ACC-3) · history import (if needed) · **SpecKit experiment on the Movies feature**
+Photos (PHO-1) · alerts (SOC-1…3) · Movies (MOV-1…3) · AI-2 restaurant lookup · AI-3 recommendations · AI-4 movie lookup · AI-7 game suggestions · email invites (INV-4) · "On this day" (MEM-T4) · structured food preferences (MEM-6) · per-type permissions (ROL-3) · account deletion (ACC-3) · board game ownership (BG-8) · **SpecKit experiment on the Movies feature**
 
 ## Phase 3
 

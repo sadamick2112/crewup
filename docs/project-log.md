@@ -4,6 +4,25 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-13 · Open questions resolved
+
+**Decided** (details in `requirements.md` §9)
+1. New Guys can add their own ratings, dishes, and notes on Activities they attended.
+2. Friends can send invites; invitees always join as New Guy.
+3. Catalogs are per group (ADR-007 now Accepted).
+4. New Guys can't see members' contact info until promoted (MEM-4, NFR-1 updated).
+5. Track board game ownership: new **BG-8 [P2]**, built alongside AI-7.
+6. No history import. Added to non-goals and removed from the Phase 2 roadmap.
+7. No commercial intent yet. Treat third-party APIs as non-commercial use; revisit if that changes.
+8. Activity Type table prefixes are the module name (`dining_`, `boardgames_`, `movies_`), replacing the short `bg_` / `mov_`. Core module tables stay unprefixed.
+9. **Build tool: Maven** (with the Maven Wrapper, `./mvnw`) instead of Gradle. The developer prefers it; there are no other changes to the stack.
+10. **Local LLM option (AI-0e):** The LLM provider is chosen per deployment by `crewup.ai.provider` (`anthropic` default, or `ollama`). Feature code uses only Spring AI's `ChatClient`. The eval set runs against both. Where Ollama runs (Windows native with GPU vs. Docker Compose) and which local model to use are decided in the M7 plan.
+
+**Git and repo**
+- Housekeeping commit done (`.gitignore` restored from GitHub's Java template plus project entries, `.gitattributes` added). No Zone.Identifier files were present.
+- Git identity in WSL uses the GitHub noreply address.
+- Branching: commit docs directly to `main` for now. From Milestone 0 on, use one branch per feature spec (e.g. `feat/m0-foundation`) with a PR to `main`.
+
 ## 2026-10-13 · Environment setup
 
 **Decided**
@@ -41,6 +60,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Finish the housekeeping above, commit, and push.
-2. Answer the **open questions** at the end of `docs/requirements.md` and update the file.
-3. Write the first feature spec: `docs/specs/m0-foundation/` (see `docs/roadmap.md`, Milestone 0), then plan and build it with Claude Code.
+1. Push `main` to GitHub. Delete or rename the old specs copy in `D:\Workspace\Portfolio\CrewUp`.
+2. Write the first feature spec: `docs/specs/m0-foundation/` (see `docs/roadmap.md`, Milestone 0), then plan and build it with Claude Code on a `feat/m0-foundation` branch.

@@ -29,7 +29,7 @@ flowchart LR
   Backend --> S3[(Object storage: MinIO locally - P2)]
   OIDC[OIDC provider: Keycloak locally] --- W
   OIDC --- Backend
-  AI --> CLAUDE[Claude API]
+  AI --> CLAUDE[Claude API or local LLM via Ollama]
   AI --> EXT[BGG · places API · TMDB]
 ```
 
@@ -43,7 +43,7 @@ flowchart LR
 | Persistence | PostgreSQL · Spring Data JPA · Flyway | Arrays and JSONB where useful; full-text search for the timeline |
 | API docs | springdoc-openapi, with a generated TypeScript client | One contract shared by backend and frontend |
 | Auth | Spring Security OAuth2 Resource Server + OIDC (Keycloak in Docker for development) | Standard and provider-agnostic. Pick a hosted provider at deploy time (ADR-004). |
-| AI | **Spring AI** with the Anthropic (Claude) model, tool calling, and structured output | Spring-native, and it fits your Java background |
+| AI | **Spring AI** with Claude (Anthropic) by default, or a local LLM through Ollama, chosen by configuration. Tool calling and structured output. | Spring-native, and it fits your Java background. The provider abstraction allows free local development and a comparison of models. |
 | Frontend | React · TypeScript · Vite · React Router · TanStack Query · Tailwind CSS + shadcn/ui · React Hook Form + Zod · Recharts | The mainstream, in-demand React stack |
 | Testing | JUnit 5 · Testcontainers · Modulith tests · Vitest + React Testing Library · Playwright (end-to-end) · MSW (API mocks) | |
 | Local environment | Docker Compose (Postgres, Keycloak, MinIO) | One command to run everything |
@@ -58,7 +58,7 @@ crewup/
 ├── docs/            requirements.md · architecture.md · roadmap.md · approach.md
 │   ├── adr/         numbered architecture decision records
 │   └── specs/<feature>/  spec.md · plan.md · tasks.md
-├── backend/         Spring Boot application (Gradle or Maven)
+├── backend/         Spring Boot application (Maven, with the Maven Wrapper)
 │   └── src/main/java/app/crewup/
 │       ├── identity/      users, OIDC mapping
 │       ├── groups/        groups, members, roles, invitations
@@ -105,7 +105,7 @@ Rules:
 - Activity Type modules depend on `events` and `groups` public APIs only, **never on each other**. Spring Modulith's `verify()` test enforces this in CI.
 - A module exposes its own REST endpoints under `/api/groups/{groupId}/activities/{activityId}/<type>/…` and its catalog under `/api/groups/{groupId}/<type>/…`.
 - Cross-module reactions use application events (for example, `ActivityCopied` or `MemberDeactivated`) through Spring Modulith's event publication registry.
-- Each module owns its own tables (prefixed `dining_`, `bg_`, `mov_`) and its own Flyway migrations folder.
+- Each module owns its own tables (prefixed with the module name: `dining_`, `boardgames_`, `movies_`) and its own Flyway migrations folder.
 
 ### Frontend registry
 
@@ -150,11 +150,16 @@ Because modules already communicate through a published API and events, a module
 ## 7. AI design
 
 - **Spring AI ChatClient** with Claude. Use a small, fast model for lookups and a stronger one only where reasoning matters.
+- **Pluggable provider (AI-0e):** Feature code depends only on `ChatClient`, never on a provider-specific class. One property, `crewup.ai.provider` (`anthropic` | `ollama`), selects the model for the whole deployment, along with model names per use (lookup vs. reasoning). Claude is the default; a local model through Ollama is the alternative for free offline development and model comparison.
+  - The local model must support tool calling and structured output (for example, a recent Qwen or Llama model). If a model can't handle a feature reliably, the feature falls back to manual entry (AI-0c) instead of returning poor results.
+  - The eval set runs against each configured provider, so quality differences are measured, not guessed.
+  - Where Ollama runs (natively on Windows with GPU access, or as an optional Docker Compose service) is decided in the M7 plan.
+  - Budget metering (AI-0d) still counts tokens for a local model, at zero cost, so the code path stays the same.
 - **Tool calling, not free text:** For AI-1, the model receives tools `bgg_search(query)` and `bgg_get(id)`, and returns a typed `BoardGameCandidate[]` (structured output). The user picks, then the backend fetches authoritative fields from BGG directly. The model chooses and summarizes; the source API supplies the facts.
 - **Recommendations (AI-3, AI-7) are hybrid:** A deterministic, unit-tested scoring function ranks candidates (dietary match, cuisine sentiment, group rating, visited recently, open at the planned time). The LLM receives the ranked list and writes the explanations. This is testable, cheap, and explainable, which makes a strong portfolio talking point.
 - **Guardrails:** prompt templates in versioned resources, timeouts, retries with backoff, response caching (for example, BGG data by ID for 30 days), a per-group monthly token budget (NFR-10), and no personal data sent beyond what a feature needs (first names and preferences only, for AI-3).
 - **Evals:** A small fixed set of lookup queries with expected results runs in CI against recorded responses, and against the live API manually.
-- **Cost:** API usage is billed to an Anthropic Console account and is **separate from your Pro subscription**. Set a monthly spend limit there.
+- **Cost:** Claude API usage is billed to an Anthropic Console account and is **separate from your Pro subscription**. Set a monthly spend limit there. A local model costs nothing per call.
 
 ## 8. Data and persistence
 
@@ -185,6 +190,6 @@ Each acceptance criterion in `requirements.md` maps to a test. Test names refere
 | 003 | User/Member split; roles on Member | Proposed |
 | 004 | OIDC provider: Keycloak for development; hosted provider TBD | Proposed |
 | 005 | Hosting platform | Open |
-| 006 | AI: Spring AI + Claude, tool calling, hybrid scoring | Proposed |
-| 007 | Per-group catalogs instead of a shared global catalog | Proposed |
+| 006 | AI: Spring AI + Claude by default, local LLM (Ollama) as a configurable alternative; tool calling, hybrid scoring | Proposed |
+| 007 | Per-group catalogs instead of a shared global catalog | Accepted (2026-10-13) |
 | 008 | External data sources: BGG, places API, TMDB, with license review | Open |
