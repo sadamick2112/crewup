@@ -22,3 +22,14 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Private source notes (not published)
+CrewUp App.docx
+
+# Windows download leftovers when copying files into WSL
+*:Zone.Identifier
+
+# Local secrets and config (see CLAUDE.md)
+.env
+.env.*
+application-local.yml
