@@ -31,7 +31,7 @@ AI-5 showtimes · AI-6 event timing · SMS invites · cloud photo links · data 
 ## Definition of done (every milestone)
 
 - Acceptance criteria covered by tests that reference requirement IDs
-- CI is green, including the Modulith `verify()` check and security scans (any suppression has a written reason)
+- CI is green, including the Modulith `verify()` check, security scans (any suppression has a written reason), coverage limits, and accessibility checks
 - `/review-standards` run against `docs/coding-standards.md` with no unresolved findings
 - Reviewed by you (and by the reviewer subagent once it exists)
 - `requirements.md` statuses and any ADRs updated

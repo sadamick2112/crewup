@@ -4,7 +4,7 @@ A plain-language guide to the technologies and terms used in CrewUp. For each on
 
 For how the pieces fit together in detail, see `architecture.md`. For the reasoning behind the bigger choices, see the ADRs in `docs/adr/`.
 
-**Contents:** [The big picture](#the-big-picture) · [Languages and build tools](#languages-and-build-tools) · [Backend](#backend) · [Sign-in and security](#sign-in-and-security) · [AI](#ai) · [Frontend](#frontend) · [Testing](#testing) · [Code quality](#code-quality) · [Running and delivering](#running-and-delivering) · [Conventions](#conventions) · [Planned for later](#planned-for-later) · [Quick reference](#quick-reference)
+**Contents:** [The big picture](#the-big-picture) · [Languages and build tools](#languages-and-build-tools) · [Backend](#backend) · [Sign-in and security](#sign-in-and-security) · [Logging and tracing](#logging-and-tracing) · [AI](#ai) · [Frontend](#frontend) · [Testing](#testing) · [Code quality](#code-quality) · [Running and delivering](#running-and-delivering) · [Conventions](#conventions) · [Planned for later](#planned-for-later) · [Quick reference](#quick-reference)
 
 ---
 
@@ -224,6 +224,22 @@ A stolen authorization code is useless without the verifier, which never left th
 
 ---
 
+## Logging and tracing
+
+### Structured logging (SLF4J and ECS)
+
+**What it is.** **SLF4J** is the standard Java logging interface; Spring Boot uses it out of the box. **Structured logging** writes each log line as JSON with named fields (`"http.status": 401`, `"traceId": "…"`) instead of free text, so log tools can search and filter by field. **ECS** (Elastic Common Schema) is a widely used standard for those field names, and Spring Boot can produce it with one setting.
+
+**What it does in CrewUp.** Locally, logs are plain readable text. Outside local development, they're ECS JSON. Every API request writes exactly one summary line (method, route, status, duration), and no log line ever contains tokens, passwords, or personal data.
+
+### Request tracing (W3C Trace Context, Micrometer Tracing, OpenTelemetry)
+
+**What it is.** A **trace** is the record of one piece of work, such as one API request, identified by a random **trace ID**. **W3C Trace Context** is the web standard for passing that ID between systems, in an HTTP header called `traceparent`. **OpenTelemetry** is the open standard for tracing, and **Micrometer Tracing** is how Spring Boot uses it.
+
+**What it does in CrewUp.** The web app puts a fresh `traceparent` on every API call. The backend continues that trace, so every log line it writes for the request carries the same trace ID, and so does any error response. When something fails, the user sees "Reference: {traceId}", and that one ID finds every related log line. Traces aren't sent to a tracing system yet; one can be added later without code changes.
+
+---
+
 ## AI
 
 AI features arrive in M7. The first one looks up board game details. Under the project rules, **AI only proposes, and the user always confirms** before anything is saved, and every AI feature has a manual alternative.
@@ -384,6 +400,18 @@ CrewUp's coding rules are in `coding-standards.md`. These tools enforce the mech
 
 **What they do in CrewUp.** `npm run lint` and `npm run format` run them locally, and CI checks both on every pull request.
 
+### JaCoCo and Vitest coverage
+
+**What they are.** **Code coverage** tools record which lines and branches of the code run while the tests run. **JaCoCo** does this for Java; **Vitest's coverage** (using the V8 JavaScript engine's built-in counters) does it for the frontend.
+
+**What they do in CrewUp.** The build fails if tests exercise less than 80% of the lines or 70% of the branches (each `if`/`else` path), on either side. CI shows a coverage table on every workflow run. Coverage only proves code *ran*, not that a test checked the result, so it's a safety net next to the requirement-named tests, not a replacement for them.
+
+### axe
+
+**What it is.** An accessibility testing engine from Deque. It checks a rendered page against the WCAG rules: images without text alternatives, inputs without labels, buttons without names, invalid ARIA, poor color contrast, and more.
+
+**What it does in CrewUp.** Component tests run axe on each page, and the Playwright test runs it in a real browser at desktop and phone widths. Any violation fails the test. This backs up the WCAG 2.2 AA requirement (NFR-4) with real checks, beyond what a linter can see in the source code.
+
 ### The `/review-standards` skill
 
 **What it is.** A Claude Code **skill**: a set of instructions, stored in the repository under `.claude/skills/`, that Claude Code follows when you type `/review-standards`.
@@ -456,6 +484,8 @@ These are small project-wide decisions that show up throughout the code.
 | Keycloak | Open-source identity provider used for development |
 | OWASP | Non-profit behind the Top 10 web security risks and the ZAP scanner |
 | CodeQL | GitHub's data-flow security scanner, run in CI |
+| Structured logging / ECS | Logs as JSON with standard field names, outside local development |
+| W3C Trace Context / OpenTelemetry | One trace ID follows a request from the browser through the backend logs |
 | Spring AI | One Java interface for calling AI models |
 | Claude / Ollama | Hosted AI model (default) / local AI models (alternative) |
 | React | Builds the UI out of reusable components |
@@ -475,6 +505,8 @@ These are small project-wide decisions that show up throughout the code.
 | Playwright | Drives real browsers to test full user journeys |
 | Spotless / Palantir Java Format | Formats the Java code automatically and checks it in the build |
 | ESLint / Prettier | Lints and formats the frontend code |
+| JaCoCo / Vitest coverage | Fail the build if tests exercise too little of the code |
+| axe | Checks rendered pages for accessibility problems |
 | `/review-standards` | Claude Code skill that reviews a branch against the coding standards |
 | Docker / Compose | Runs PostgreSQL and Keycloak locally with one command |
 | GitHub Actions | Runs CI on every push and pull request |

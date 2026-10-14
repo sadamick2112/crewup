@@ -48,6 +48,7 @@ flowchart LR
 | AI | **Spring AI** with Claude (Anthropic) by default, or a local LLM through Ollama, chosen by configuration. Tool calling and structured output. | Spring-native, and it fits your Java background. The provider abstraction allows free local development and a comparison of models. |
 | Frontend | React · TypeScript · Vite · React Router · TanStack Query · Tailwind CSS + shadcn/ui · React Hook Form + Zod · Recharts | The mainstream, in-demand React stack |
 | Testing | JUnit 5 · Testcontainers · Modulith tests · Vitest + React Testing Library · Playwright (end-to-end) · MSW (API mocks) | |
+| Observability | SLF4J logs (readable locally, ECS JSON elsewhere); Micrometer Tracing + OpenTelemetry with W3C `traceparent` from the browser | One trace ID follows a user action from the browser through every backend log line, and appears in error responses. A trace viewer can be added later without code changes. |
 | Local environment | Docker Compose (Postgres, Keycloak, MinIO) | One command to run everything |
 | CI | GitHub Actions: build, test, lint, Modulith verification, Playwright smoke test, security scans (Semgrep, CodeQL, gitleaks, Dependabot) | Security scanning is part of every PR, not a later audit. |
 | Hosting | TBD (ADR-005): for example Fly.io, Render, or AWS (App Runner + RDS) | A live demo link matters for your resume |
@@ -181,6 +182,8 @@ Because modules already communicate through a published API and events, a module
 | Integration | Testcontainers (Postgres, Keycloak) | Repositories, migrations, security |
 | API contract | OpenAPI spec diff in CI | Prevents breaking the generated frontend client |
 | Security | Semgrep, CodeQL, gitleaks, Dependabot; ZAP baseline (M8) | Injection, XSS, insecure configuration, secrets, vulnerable dependencies |
+| Coverage | JaCoCo, Vitest V8 coverage | Build fails below 80% line / 70% branch coverage |
+| Accessibility | axe-core in component tests, `@axe-core/playwright` end to end | WCAG 2.2 A/AA violations on rendered pages (NFR-4) |
 | Component | React Testing Library + MSW | Forms, attendee picker, registry plug-ins |
 | End to end | Playwright | Golden paths: create group → invite → log dinner → see timeline |
 

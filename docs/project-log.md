@@ -4,6 +4,31 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-14 · Logging and request tracing
+
+**Decided** (spec M0-26…M0-28 and §6 decision 10; `coding-standards.md` LOG-1…LOG-7; NFR-9 updated)
+1. **Scope:** request tracing (W3C Trace Context via Micrometer Tracing + OpenTelemetry bridge) and browser-to-backend correlation (the web app sends `traceparent`; errors show "Reference: {traceId}"). Logs are viewed in the console: readable locally, ECS JSON elsewhere.
+2. **Deferred:** a log/trace viewer and trace export (no code change needed later); audit trail of data changes (NFR-7, from M1); sending non-API browser errors to the backend (needs an abuse-protected endpoint).
+3. New task **T7** (logging and tracing, test-first); later tasks renumbered T8–T17.
+
+## 2026-10-14 · Test-driven development
+
+**Decided** (CLAUDE.md principles 5–6, `coding-standards.md` TEST-2, TEST-11, GIT-2)
+1. **Test first** for domain rules, endpoints, and bug fixes: tests from the acceptance criteria, run to confirm they fail on assertions, committed, then implemented. Setup, configuration, and visual styling are exempt.
+2. **Committed tests are never changed to make them pass.** A wrong test means stopping to ask; an approved correction gets its own commit.
+3. Stubs that throw are allowed in the red commit so tests compile. Push after the green commit, so CI doesn't run red.
+4. `/review-standards` checks the commit order and that the implementation commit left the tests unchanged. M0 tasks T4, T5, T6, T7, T10, T11, T14 are test-first (numbers after the logging task was added).
+5. **Coverage is a floor, not a goal** (CLAUDE.md principle 7, TEST-9): no tests written only to raise coverage; thresholds lowered or exclusions added only with the user's approval (replacing the earlier "never lowered").
+6. **Not getting stuck on coverage:** TEST-12 defines what to do when the gate fails (one pass at testing untested criteria and deleting dead code, then stop and report). GEN-10 bans speculative code, so the M0 `@RestControllerAdvice` moved to M1. Coverage runs at every task's final commit. Sign-in logic sits in a small tested `restoreSession()`, keeping the untested OIDC wiring to one config file.
+
+## 2026-10-14 · Test quality gates
+
+**Decided** (spec M0-24, M0-25 and §6 decision 9; plan §8)
+1. **Coverage gate:** JaCoCo (backend, unit + integration tests) and Vitest V8 coverage (frontend) fail the build below 80% line / 70% branch. Limits only go up. Summaries go to the CI run page, not PR comments.
+2. **Accessibility:** axe-core in component tests and `@axe-core/playwright` end to end, with zero violations allowed (NFR-4). Color contrast is checked only in Playwright.
+3. Commitlint was declined; GIT-1 stays review-only. PIT mutation testing is a candidate after M0. Performance budgets (NFR-5) and container image scanning belong to later milestones.
+4. M0 `plan.md` and `tasks.md` drafted; plan approved.
+
 ## 2026-10-14 · Coding standards
 
 **Decided** (details in `coding-standards.md` and `specs/m0-foundation/spec.md` M0-20…M0-23, §6 decision 8)
