@@ -213,7 +213,7 @@ General rules for all AI features:
 | **NFR-6 Time** | Store instants in UTC with the Event's IANA time zone. Display in the viewer's local time. |
 | **NFR-7 Auditability** | Every record has created and updated timestamps and authors. Deletes are soft for 30 days. |
 | **NFR-8 Testability** | Every requirement ID maps to at least one automated test. Module boundaries are verified in CI. |
-| **NFR-9 Operability** | Structured logs, health checks, and basic metrics. Runs locally with one `docker compose up`. |
+| **NFR-9 Operability** | Structured logs with a trace ID on every line, request tracing from the browser through the backend, health checks, and basic metrics. Runs locally with one `docker compose up`. |
 | **NFR-10 AI cost** | AI calls are metered per group. Responses are cached (for example, board game details by BGG ID). |
 
 ## 7. Logical data model
