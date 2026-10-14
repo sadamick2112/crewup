@@ -66,7 +66,7 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 - [ ] Migration `db/migration/identity/V20261014120000__identity_create_users.sql`.
 - [ ] `User` entity, `UserRepository`, `UserProvisioningService` (create, refresh changed claims, survive concurrent first calls), `MeController`.
 
-**Done when:** tests pass without changes, and a manual `curl` with a real Keycloak token returns the profile. **Commit:** `feat(identity): provision user and add GET /api/me [M0-6, ACC-1]`
+**Done when:** tests pass without changes, and a manual `curl` with a real Keycloak token returns the profile (`TOKEN=$(python3 infra/keycloak/get-dev-token.py)`). **Commit:** `feat(identity): provision user and add GET /api/me [M0-6, ACC-1]`
 
 ### T7 · Logging and request tracing 🔴→🟢 [plan §5]
 **Red**
@@ -77,7 +77,7 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 - [ ] `RequestLoggingFilter` (one INFO line, key-values only, `/api/**` only), `ProblemDetailsSupport` used by the security handlers, and a `ResponseBodyAdvice<ProblemDetail>`.
 - [ ] `application.yml`: log levels, W3C propagation, sampling 1.0; ECS JSON via `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` (documented in `.env.example`).
 
-**Done when:** tests pass without changes, `./mvnw verify` passes with coverage, and a manual `curl -H 'traceparent: 00-<id>-<span>-01'` shows that trace ID in the backend log line. **Commit:** `feat(shared): add request logging and W3C trace correlation [M0-26, M0-27, NFR-9]`
+**Done when:** tests pass without changes, `./mvnw verify` passes with coverage, and a manual `curl -H "Authorization: Bearer $TOKEN" -H 'traceparent: 00-<id>-<span>-01' localhost:8080/api/me` (token from `infra/keycloak/get-dev-token.py`) shows that trace ID in the backend log line. **Commit:** `feat(shared): add request logging and W3C trace correlation [M0-26, M0-27, NFR-9]`
 
 ### T8 · OpenAPI contract [plan §5]
 - [ ] springdoc configured (API title, bearer-auth security scheme). `/api/me` documented with responses 200 and 401.

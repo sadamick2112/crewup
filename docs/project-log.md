@@ -4,6 +4,24 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-14 · Handoff: M0 implementation started (T1–T2 done, T3 next)
+
+**Where things stand**
+- Branch `feat/m0-foundation`, not pushed yet. Spec, plan and tasks for M0 are **approved**; work proceeds one task at a time from `docs/specs/m0-foundation/tasks.md` (check boxes show progress).
+- **T1 done:** versions pinned in `plan.md` §2 (note the deliberate holds: TypeScript 5.9.3, ESLint 9). **T2 done:** `docker-compose.yml`, `.env.example`, `infra/keycloak/crewup-realm.json`.
+- **Next: T3** (backend scaffold). Start a new session with: *"Read CLAUDE.md and docs/project-log.md, then implement T3 from docs/specs/m0-foundation/tasks.md."*
+
+**Developer machine (WSL Ubuntu)**
+- Java: Temurin **25.0.3** via SDKMAN (one patch behind Adoptium's 25.0.4.1; fine). Node **24.22.0** via nvm (`.nvmrc`). Docker Desktop with WSL integration (Docker 29.7.2, Compose v5.5.1).
+- Non-interactive shells may not load SDKMAN/nvm. If `java`/`node` aren't found, run `source ~/.sdkman/bin/sdkman-init.sh` and `. ~/.nvm/nvm.sh` first.
+- `.env` already exists locally (copied from `.env.example`). Postgres and Keycloak may still be running: `docker compose ps`.
+
+**Local environment facts learned in T2**
+- Keycloak: admin console http://localhost:8180/admin (`admin` / `admin-dev-only`). No data volume, so `docker compose down` resets the realm (and any registered accounts) from the committed export. Postgres data persists in the `postgres-data` volume.
+- Access tokens: issuer `http://localhost:8180/realms/crewup`, audience `crewup-api`, `azp` `crewup-web`, with `sub`, `email`, `name`, `preferred_username` claims. **Lifetime is 5 minutes** (Keycloak default).
+- **Getting a real token for manual API calls:** `TOKEN=$(python3 infra/keycloak/get-dev-token.py)`. The password grant is disabled on purpose, so the script runs the PKCE flow. `--claims` shows the claims; `--check` re-verifies the realm (PKCE required, foreign redirects refused, registration on, `crewup-api` audience). Used by T6's and T7's manual checks.
+- Keycloak's cookies are `Secure`. Browsers (and Playwright) send them to `http://localhost` because it's a secure context; plain HTTP clients such as Python's cookie jar don't, which is why the script clears the flag. Keep this in mind for any scripted sign-in.
+
 ## 2026-10-14 · Logging and request tracing
 
 **Decided** (spec M0-26…M0-28 and §6 decision 10; `coding-standards.md` LOG-1…LOG-7; NFR-9 updated)
