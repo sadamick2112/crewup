@@ -7,6 +7,7 @@ A shared memory log for long-running friend groups: plan get-togethers, log acti
 - `docs/requirements.md` contains requirement IDs (such as EVT-5). Every feature traces to IDs.
 - `docs/architecture.md` explains modules, the Activity Type plug-in contract, and security.
 - `docs/roadmap.md` lists milestones and the definition of done.
+- `docs/coding-standards.md` — the coding rules, with IDs such as JAVA-3. Follow them in all code you write, and cite the rule ID when you deliberately break one.
 - Before implementing a feature, read its `docs/specs/<feature>/spec.md`, `plan.md`, and `tasks.md`. If they don't exist, stop and propose creating them.
 
 ## Principles (the project's constitution)
@@ -17,6 +18,7 @@ A shared memory log for long-running friend groups: plan get-togethers, log acti
 4. **AI proposes, the user confirms.** AI never writes data without confirmation, and every AI feature has a manual fallback.
 5. **Tests prove requirements.** Test names reference requirement IDs. Write or update tests in the same change as the code.
 6. **Small steps.** One task from `tasks.md` at a time: implement, test, commit.
+7. **Standards are checked, not hoped for.** Code follows `docs/coding-standards.md`. Run the formatters before committing (`./mvnw spotless:apply`, `npm run format`), and run `/review-standards` before opening a pull request.
 
 ## Stack
 
@@ -29,7 +31,9 @@ Testing: JUnit 5, Testcontainers, Modulith tests, Vitest, React Testing Library,
 <!-- Fill these in during Milestone 0 -->
 - Start dependencies: `docker compose up -d`
 - Backend (Maven, via the wrapper): `./mvnw spring-boot:run` · test: `./mvnw test` · full build with integration tests: `./mvnw verify`
-- Frontend: `npm run dev` · test: `npm test` · lint: `npm run lint`
+- Backend formatting: `./mvnw spotless:apply` (fix) · `./mvnw spotless:check` (check; also runs in `verify`)
+- Frontend: `npm run dev` · test: `npm test` · lint: `npm run lint` · format: `npm run format` · type check: `npm run typecheck`
+- Standards review before a PR: `/review-standards`
 - Regenerate API client: `npm run gen:api`
 - End-to-end tests: `npm run e2e`
 
