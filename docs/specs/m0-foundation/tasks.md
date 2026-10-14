@@ -26,13 +26,13 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 **Done when:** `docker compose up -d` brings both services up healthy, the dev user can sign in to the Keycloak account console, and a token from the `crewup-web` client contains `aud: crewup-api` (checked by hand, noted in the commit body). **Commit:** `chore(infra): add Postgres and Keycloak with dev realm [M0-1, M0-14]`
 
 ### T3 · Backend scaffold [plan §3, §5]
-- [ ] Generate the project into `backend/` (Maven, Java 25, `app.crewup`, the plan §3 dependencies), with the Maven Wrapper.
-- [ ] `application.yml`: imports `../.env`, datasource, Flyway location `db/migration/*`, actuator (health and info only, components shown), `spring.mvc.problemdetails.enabled`.
-- [ ] Spotless with Palantir Java Format, `check` bound to `verify` (M0-20).
-- [ ] JaCoCo: `prepare-agent`, `report` and `check` (line ≥ 80%, branch ≥ 70%) in `verify`; exclude `CrewUpApplication` with a reason (M0-24).
-- [ ] Testcontainers base: a `@ServiceConnection` Postgres configuration shared by integration tests.
-- [ ] `ModularityTests` with `M0_8_moduleBoundariesAreRespected`.
-- [ ] Tests: `M0_2_applicationStartsAndMigratesSchema`, `M0_3_healthIsPublicAndReportsDatabase` (health is temporarily open while security is wide open; T5 locks the rest down).
+- [x] Generate the project into `backend/` (Maven, Java 25, `app.crewup`, the plan §3 dependencies), with the Maven Wrapper.
+- [x] `application.yml`: imports `../.env`, datasource, Flyway location `db/migration/*`, actuator (health and info only, components shown), `spring.mvc.problemdetails.enabled`.
+- [x] Spotless with Palantir Java Format, `check` bound to `verify` (M0-20).
+- [x] JaCoCo: `prepare-agent`, `report` and `check` (line ≥ 80%, branch ≥ 70%) in `verify`; exclude `CrewUpApplication` with a reason (M0-24).
+- [x] Testcontainers base: a `@ServiceConnection` Postgres configuration shared by integration tests.
+- [x] `ModularityTests` with `M0_8_moduleBoundariesAreRespected`.
+- [x] Tests: `M0_2_applicationStartsAndMigratesSchema`, `M0_3_healthIsPublicAndReportsDatabase` (health is temporarily open while security is wide open; T5 locks the rest down).
 
 **Done when:** `./mvnw verify` passes with coverage above the limits, a temporarily untested class makes it fail (then remove it), and `./mvnw spring-boot:run` starts against Compose. **Commit:** `feat(backend): scaffold Spring Boot Modulith app [M0-2, M0-3, M0-8, M0-20, M0-24]`
 

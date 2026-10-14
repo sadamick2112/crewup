@@ -4,6 +4,18 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-14 · T3 backend scaffold done (T4 next)
+
+**Learned while scaffolding** (Boot 4.1.1, generated from start.spring.io and trimmed to plan §3)
+- **Boot 4 renamed and split starters.** Plan §3's names map to `spring-boot-starter-webmvc` (was `-web`), `spring-boot-starter-flyway` (needed for Flyway auto-configuration; `flyway-core` alone no longer triggers it), `spring-boot-starter-security-oauth2-resource-server`, and per-module test starters (`spring-boot-starter-webmvc-test` brings `spring-boot-starter-test` and MockMvc; `spring-boot-starter-security-test` brings `spring-security-test`). Testcontainers 2 uses `org.testcontainers.postgresql.PostgreSQLContainer` and the `testcontainers-postgresql` / `testcontainers-junit-jupiter` artifacts.
+- start.spring.io's "modulith" adds observability, actuator and runtime modules; they were left out (not in plan §3; observability belongs with T7's tracing choice). The tracing bridge itself is added in T7, as that task says.
+- **First migration is Modulith's event registry, not an empty baseline.** `spring-modulith-starter-jpa` maps `event_publication` and `event_publication_archive`, and `ddl-auto: validate` fails without them. So `db/migration/shared/V20261014110000__shared_create_event_publication.sql` creates both (columns from Modulith 2.1's JPA mapping). This satisfies M0-2's "Flyway runs on startup" with a real migration.
+- `classpath:db/migration/*` (wildcard) works with Flyway as planned.
+- **Temporary `app.crewup.SecurityConfig` permits everything**, because the security starter otherwise puts basic auth on every endpoint, including health. **T5 replaces it.**
+- Integration tests use the `@IntegrationTest` meta-annotation (`@SpringBootTest` + MockMvc + Testcontainers Postgres `postgres:18.6`), so the whole run shares one context and one container. Tests use constructor injection (JAVA-3).
+- Without a `.env` (as in CI), tests still pass: `@ServiceConnection` replaces the datasource settings.
+- Checked by hand: an untested class drops coverage to 25% line / 0% branch and fails `verify`; `./mvnw spring-boot:run` starts against Compose and `/actuator/health` shows `db: UP` without details.
+
 ## 2026-10-14 · Handoff: M0 implementation started (T1–T2 done, T3 next)
 
 **Where things stand**

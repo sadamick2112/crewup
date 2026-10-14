@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: crewup
+  config:
+    # One config file for Compose and the backend (plan §4). Run from backend/, so .env is one level up.
+    import: optional:file:../.env[.properties]
+  datasource:
+    url: jdbc:postgresql://localhost:${CREWUP_DB_PORT}/${CREWUP_DB_NAME}
+    username: ${CREWUP_DB_USER}
+    password: ${CREWUP_DB_PASSWORD}
+  flyway:
+    # One folder per module (db/migration/<module>/), with timestamp versions so folders never collide.
+    locations: classpath:db/migration/*
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      # Component names and status (db, ping) are public; details such as the database product are not.
+      show-components: always
+      show-details: never
