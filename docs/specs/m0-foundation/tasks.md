@@ -19,9 +19,9 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 **Done when:** the versions table has exact versions with the date checked. **Commit:** `chore: pin M0 versions and add editor config [M0-22]`
 
 ### T2 · Local services [plan §4]
-- [ ] `docker-compose.yml`: Postgres and Keycloak (`start-dev --import-realm`), ports from `.env`, Postgres health check, named volume.
-- [ ] `.env.example` with dev-only values and a comment on each.
-- [ ] `infra/keycloak/crewup-realm.json`: realm `crewup`, client `crewup-web` (public, PKCE S256, redirect and web origin for :5173), `crewup-api` audience mapper, self-registration on, dev user `dev@crewup.local`, "DEV ONLY" descriptions.
+- [x] `docker-compose.yml`: Postgres and Keycloak (`start-dev --import-realm`), ports from `.env`, Postgres health check, named volume.
+- [x] `.env.example` with dev-only values and a comment on each.
+- [x] `infra/keycloak/crewup-realm.json`: realm `crewup`, client `crewup-web` (public, PKCE S256, redirect and web origin for :5173), `crewup-api` audience mapper, self-registration on, dev user `dev@crewup.local`, "DEV ONLY" descriptions.
 
 **Done when:** `docker compose up -d` brings both services up healthy, the dev user can sign in to the Keycloak account console, and a token from the `crewup-web` client contains `aud: crewup-api` (checked by hand, noted in the commit body). **Commit:** `chore(infra): add Postgres and Keycloak with dev realm [M0-1, M0-14]`
 

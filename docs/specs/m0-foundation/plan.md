@@ -51,7 +51,7 @@ Pinned in T1 on **October 14, 2026**, from start.spring.io, `repo1.maven.org` me
 
 | Component | Version | Notes |
 |---|---|---|
-| Java | 25 (Temurin 25.0.4.1+1) | LTS. Java 27 exists, but 25 is the LTS line |
+| Java | 25 (latest Temurin 25 patch; 25.0.3 via SDKMAN locally) | LTS. Java 27 exists, but 25 is the LTS line. CI uses `java-version: 25` |
 | Maven (wrapper) | 3.10.0 | Maven 4 is still a release candidate |
 | Spring Boot | 4.1.1 | start.spring.io default; 4.2 is in milestones |
 | Spring Modulith | 2.1.1 (BOM) | the 2.1 line targets Boot 4.1 |
