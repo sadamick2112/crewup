@@ -4,6 +4,20 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-14 · Coding standards
+
+**Decided** (details in `coding-standards.md` and `specs/m0-foundation/spec.md` M0-20…M0-23, §6 decision 8)
+1. `docs/coding-standards.md` holds the rules, each with an ID (JAVA-3, TS-5…) and how it's enforced. `CLAUDE.md` points Claude Code at it for all generated code.
+2. **Java formatting: Palantir Java Format** through Spotless (4-space indent, 120 columns), checked in `./mvnw verify`. Frontend: ESLint + Prettier + `tsc` strict, checked in CI.
+3. **PR review is local, not in CI:** run the `/review-standards` skill (`.claude/skills/review-standards/`) before every PR; the PR template has it as a checklist item. A Claude review in GitHub Actions was considered and deferred to avoid API costs. The M2 `code-reviewer` subagent should reuse the same standards document.
+
+## 2026-10-14 · Security scanning built in
+
+**Decided** (details in `specs/m0-foundation/spec.md` M0-15…M0-19 and §6)
+1. Security scanning starts in M0 CI: Semgrep (community + project rules in `.semgrep/`), CodeQL (free because the repo is public), gitleaks, and Dependabot. High-severity findings fail the build.
+2. CSRF stays off for the stateless bearer-token API. Scanner findings about it are suppressed with a reference to ADR-004, not "fixed".
+3. Broken access control is the main risk and static analysis can't catch it reliably, so per-role authorization tests and an `@PreAuthorize` guard test (M2) cover it. An OWASP ZAP baseline scan of the deployed app joins in M8.
+
 ## 2026-10-13 · Open questions resolved
 
 **Decided** (details in `requirements.md` §9)

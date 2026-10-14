@@ -2,6 +2,8 @@
 
 **Status:** Draft v0.1 · October 6, 2026 · Companion to `requirements.md`
 
+> New to a technology mentioned here? See `technology-guide.md` for plain-language explanations.
+>
 > Version numbers below are targets. Confirm the current stable releases when you scaffold the project (Milestone 0).
 
 ## 1. System overview
@@ -47,7 +49,7 @@ flowchart LR
 | Frontend | React · TypeScript · Vite · React Router · TanStack Query · Tailwind CSS + shadcn/ui · React Hook Form + Zod · Recharts | The mainstream, in-demand React stack |
 | Testing | JUnit 5 · Testcontainers · Modulith tests · Vitest + React Testing Library · Playwright (end-to-end) · MSW (API mocks) | |
 | Local environment | Docker Compose (Postgres, Keycloak, MinIO) | One command to run everything |
-| CI | GitHub Actions: build, test, lint, Modulith verification, Playwright smoke test | |
+| CI | GitHub Actions: build, test, lint, Modulith verification, Playwright smoke test, security scans (Semgrep, CodeQL, gitleaks, Dependabot) | Security scanning is part of every PR, not a later audit. |
 | Hosting | TBD (ADR-005): for example Fly.io, Render, or AWS (App Runner + RDS) | A live demo link matters for your resume |
 
 ## 3. Repository layout (monorepo)
@@ -145,7 +147,9 @@ Because modules already communicate through a published API and events, a module
 - A `GroupAccessEvaluator` resolves the caller's Member and role for `{groupId}` once per request. Method security (`@PreAuthorize("@groupAccess.can(#groupId, 'EVENT_EDIT')")`) checks permissions from the ROL-2 matrix.
 - "Own only" rules compare `created_by` to the caller's Member.
 - Invitation tokens are random 256-bit values, stored hashed, single use, and expiring.
-- Tests: every endpoint has an authorization test per role, generated from the permission matrix.
+- Tests: every endpoint has an authorization test per role, generated from the permission matrix. A guard test fails if any `/api/groups/{groupId}/**` handler lacks `@PreAuthorize`.
+- CSRF protection is off for `/api/**` because the API is stateless and accepts only bearer tokens (ADR-004). It comes back on if cookie sessions are ever introduced.
+- Static analysis: Semgrep (community and project rules in `.semgrep/`) and CodeQL run in CI. gitleaks scans for secrets, and Dependabot watches dependencies. Suppressions need a written reason. An OWASP ZAP baseline scan runs against the deployed app from M8 on.
 
 ## 7. AI design
 
@@ -176,6 +180,7 @@ Because modules already communicate through a published API and events, a module
 | Module | Spring Modulith `@ApplicationModuleTest`, `verify()` | Module boundaries; each module tested in isolation |
 | Integration | Testcontainers (Postgres, Keycloak) | Repositories, migrations, security |
 | API contract | OpenAPI spec diff in CI | Prevents breaking the generated frontend client |
+| Security | Semgrep, CodeQL, gitleaks, Dependabot; ZAP baseline (M8) | Injection, XSS, insecure configuration, secrets, vulnerable dependencies |
 | Component | React Testing Library + MSW | Forms, attendee picker, registry plug-ins |
 | End to end | Playwright | Golden paths: create group → invite → log dinner → see timeline |
 
