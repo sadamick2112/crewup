@@ -424,7 +424,7 @@ CrewUp's coding rules are in `coding-standards.md`. These tools enforce the mech
 
 ### Docker and Docker Compose
 
-**What they are.** **Docker** runs software in **containers**: lightweight, isolated packages that include everything a program needs, so it runs the same on any machine. **Docker Compose** starts several containers together from one file, `compose.yaml`.
+**What they are.** **Docker** runs software in **containers**: lightweight, isolated packages that include everything a program needs, so it runs the same on any machine. **Docker Compose** starts several containers together from one file, `docker-compose.yml`.
 
 **What they do in CrewUp.** `docker compose up -d` starts PostgreSQL and Keycloak, already configured. Nobody installs a database or identity provider by hand. Testcontainers also uses Docker during tests.
 

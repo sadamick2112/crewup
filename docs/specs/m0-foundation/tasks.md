@@ -11,10 +11,10 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 ---
 
 ### T1 · Pin versions and repo basics [plan §1, §2]
-- [ ] Confirm the current stable version of every component in plan §2 from official sources, and replace the "Expected line" column with a pinned-versions table in `plan.md`.
-- [ ] Add `.editorconfig` (M0-22) and `.nvmrc`.
-- [ ] Check `.gitignore` covers `target/`, `node_modules/`, `dist/`, `.env`, `application-local.yml`, `playwright-report/`, `test-results/`.
-- [ ] Technology guide: `compose.yaml` → `docker-compose.yml`.
+- [x] Confirm the current stable version of every component in plan §2 from official sources, and replace the "Expected line" column with a pinned-versions table in `plan.md`.
+- [x] Add `.editorconfig` (M0-22) and `.nvmrc`.
+- [x] Check `.gitignore` covers `target/`, `node_modules/`, `dist/`, `.env`, `application-local.yml`, `playwright-report/`, `test-results/`.
+- [x] Technology guide: `compose.yaml` → `docker-compose.yml`.
 
 **Done when:** the versions table has exact versions with the date checked. **Commit:** `chore: pin M0 versions and add editor config [M0-22]`
 

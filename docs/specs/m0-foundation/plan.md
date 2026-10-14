@@ -45,23 +45,54 @@ crewup/
 
 ## 2. Versions
 
-Exact versions are checked against official sources (start.spring.io, Maven Central, nodejs.org, Docker Hub/Quay) in T1, pinned, and recorded in a table in this file. These are the release lines expected as of October 2026:
+Pinned in T1 on **October 14, 2026**, from start.spring.io, `repo1.maven.org` metadata, the npm registry, nodejs.org, the Adoptium API, Docker Hub and GitHub releases. From here on, Dependabot proposes updates.
 
-| Component | Expected line | Notes |
+**Backend and services**
+
+| Component | Version | Notes |
 |---|---|---|
-| Java | 25 (Temurin) | LTS |
-| Spring Boot | 4.0.x or 4.1.x (latest GA) | with Spring Framework 7 |
-| Spring Modulith | 2.1.x (BOM) | matches Boot 4 |
-| springdoc-openapi | 3.x | the Boot 4 line |
-| PostgreSQL | 18 | Docker image `postgres:18` |
-| Keycloak | 26.x latest | no LTS; track latest |
-| Node | 24 LTS (26 if it has entered LTS) | `.nvmrc` + `engines` |
-| React / Vite / Tailwind | 19 / latest major / 4.x | |
-| TanStack Query / React Router | 5.x / 7.x | |
+| Java | 25 (Temurin 25.0.4.1+1) | LTS. Java 27 exists, but 25 is the LTS line |
+| Maven (wrapper) | 3.10.0 | Maven 4 is still a release candidate |
+| Spring Boot | 4.1.1 | start.spring.io default; 4.2 is in milestones |
+| Spring Modulith | 2.1.1 (BOM) | the 2.1 line targets Boot 4.1 |
+| springdoc-openapi | 3.1.1 | 3.1 is built on Boot 4.1 |
+| Micrometer Tracing (OTel bridge) | managed by Boot 4.1.1 | not pinned separately |
+| Spotless Maven plugin | 3.10.4 | |
+| Palantir Java Format | 2.102.0 | |
+| JaCoCo | 0.8.15 | supports Java 25 |
+| PostgreSQL | 18.6 (`postgres:18.6`) | |
+| Keycloak | 26.8.1 (`quay.io/keycloak/keycloak:26.8.1`) | no LTS; track latest |
+
+**Frontend**
+
+| Package | Version | Package | Version |
+|---|---|---|---|
+| Node | 24.22.0 (LTS "Krypton") | `typescript` | **5.9.3** (see below) |
+| `react` / `react-dom` | 19.3.1 | `eslint` | **9.39.5** (see below) |
+| `react-router` | 8.4.0 | `typescript-eslint` | 8.71.2 |
+| `@tanstack/react-query` | 5.104.2 | `eslint-plugin-react-hooks` | 7.1.1 |
+| `vite` | 8.3.4 | `eslint-plugin-react-refresh` | 0.5.7 |
+| `@vitejs/plugin-react` | 6.1.2 | `eslint-plugin-jsx-a11y` | 6.10.2 |
+| `tailwindcss` / `@tailwindcss/vite` | 4.3.3 | `eslint-plugin-testing-library` | 7.16.2 |
+| `shadcn` (CLI) | 4.21.5 | `prettier` | 3.9.10 |
+| `oidc-client-ts` | 3.5.0 | `eslint-config-prettier` | 10.1.8 |
+| `react-oidc-context` | 3.3.1 | `prettier-plugin-tailwindcss` | 0.8.1 |
+| `openapi-typescript` | 7.13.0 | `vitest` / `@vitest/coverage-v8` | 5.0.4 |
+| `openapi-fetch` | 0.17.0 | `jsdom` | 30.1.2 |
+| `msw` | 3.0.3 | `@testing-library/react` | 16.3.3 |
+| `@playwright/test` | 1.64.1 | `@testing-library/user-event` | 14.6.8 |
+| `@axe-core/playwright` | 4.13.0 | `@testing-library/jest-dom` | 7.0.1 |
+| `axe-core` | 4.14.0 | | |
+
+**Deliberately not the latest:**
+- **TypeScript 5.9.3, not 7.0.** TypeScript 7 is the new native (Go) compiler. `typescript-eslint` supports only `<6.1`, and `openapi-typescript` declares `^5.x`. 5.9.3 is the newest version every tool accepts. Revisit when `typescript-eslint` supports 7.
+- **ESLint 9.39.5, not 10.** `eslint-plugin-jsx-a11y` (last released 2024) supports ESLint up to 9. Revisit when it supports 10, or when a maintained replacement exists.
+- **React Router 8, not 7** (the plan's expected line). 8 is the current major; the routing needs here are basic.
+- **Tracing:** `micrometer-tracing-bridge-otel` rather than Boot 4's `spring-boot-starter-opentelemetry`. The starter brings an OTLP exporter, which would try to send traces to a collector that M0 doesn't have. The bridge gives trace IDs in logs with nothing to switch off. Moving to the starter later is a dependency swap.
 
 ## 3. Dependencies and why (CLAUDE.md: "say why in the plan")
 
-**Backend (runtime):** `spring-boot-starter-web`, `-security`, `-oauth2-resource-server` (JWT validation), `-data-jpa`, `-validation`, `-actuator` (health, M0-3), `flyway-core` + `flyway-database-postgresql`, `postgresql` driver, `spring-modulith-starter-core` + `-starter-jpa` (module model and event registry), `springdoc-openapi-starter-webmvc-ui` (OpenAPI, M0-9), `micrometer-tracing-bridge-otel` (W3C trace context and `traceId`/`spanId` in logs, M0-27; if Boot 4's OpenTelemetry starter is the current recommended route, T1 uses that instead). No exporter in M0.
+**Backend (runtime):** `spring-boot-starter-web`, `-security`, `-oauth2-resource-server` (JWT validation), `-data-jpa`, `-validation`, `-actuator` (health, M0-3), `flyway-core` + `flyway-database-postgresql`, `postgresql` driver, `spring-modulith-starter-core` + `-starter-jpa` (module model and event registry), `springdoc-openapi-starter-webmvc-ui` (OpenAPI, M0-9), `micrometer-tracing-bridge-otel` (W3C trace context and `traceId`/`spanId` in logs, M0-27; chosen over the OpenTelemetry starter in §2). No exporter in M0.
 **Backend (test):** `spring-boot-starter-test`, `spring-security-test` (mock JWTs, so no Keycloak container is needed for backend tests), `spring-boot-testcontainers` + Testcontainers `postgresql`/`junit-jupiter` (TEST-4), `spring-modulith-starter-test`.
 **Backend (build):** `spotless-maven-plugin` with Palantir Java Format (M0-20); `jacoco-maven-plugin` for the coverage gate (M0-24).
 **Not added:** Lombok (JAVA-4), a UUID library (v7 is about 20 lines in `shared.Ids`, unit-tested), Testcontainers-Keycloak (Playwright covers real Keycloak).
