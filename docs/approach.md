@@ -33,7 +33,7 @@ In practice, that means:
 1. **Spec:** `docs/specs/<feature>/spec.md` holds user stories, acceptance criteria (pulled from the requirements IDs), and what's out of scope. Ask Claude to interview you and flag gaps before you approve it.
 2. **Plan:** In Claude Code **plan mode**, Claude writes `plan.md` covering affected modules, API changes, data migrations, and the test approach. You review and edit it, because this is where your principal-engineer judgment matters most.
 3. **Tasks:** `tasks.md` is a checklist of small, independently testable steps.
-4. **Implement:** Claude works one task at a time, running tests and committing after each.
+4. **Implement:** Claude works one task at a time. For domain rules, endpoints and bug fixes it works test first: failing tests from the acceptance criteria, committed, then the implementation, committed. Setup, configuration and styling are implemented and tested in one commit.
 5. **Review:** A fresh-context review (later, a `code-reviewer` subagent) checks the diff against the spec's acceptance criteria.
 6. **Close:** Update the requirement status and note any decisions in `docs/adr/`.
 

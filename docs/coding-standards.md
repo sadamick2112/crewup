@@ -17,6 +17,8 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 | **Prettier** | TypeScript, CSS, JSON and Markdown formatting | `npm run format` |
 | **TypeScript compiler** (`strict`) | Type errors | `npm run typecheck` |
 | **Semgrep** (project rules in `.semgrep/`) | Security and project-specific patterns | `semgrep --config .semgrep` |
+| **JaCoCo** / **Vitest coverage** | Coverage at least 80% line and 70% branch | `./mvnw verify` / `npm run test:coverage` |
+| **axe-core** (component tests, Playwright) | Accessibility violations on rendered pages | `npm test` / `npm run e2e` |
 | **Spring Modulith** `verify()` | Module boundaries | `./mvnw test` |
 | **Review** | Everything that needs judgment | `/review-standards` in Claude Code |
 
@@ -35,6 +37,7 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 - **GEN-7** Never log tokens, passwords, or personal data (email, phone, food preferences). Log IDs instead. *Review*
 - **GEN-8** Prefer clear code over clever code. This is a learning and portfolio project: a reader should follow it without a debugger. *Review*
 - **GEN-9** Don't add a dependency without saying why in the plan (`CLAUDE.md`). *Review*
+- **GEN-10** No speculative code. Write code only when a requirement or the current task needs it: no handlers, options or abstractions "for later". Code that nothing uses can't be tested honestly, and it costs reading time. *Review, coverage (TEST-9)*
 
 ## Java and Spring (JAVA)
 
@@ -52,6 +55,16 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 - **JAVA-12** Log with SLF4J placeholders (`log.info("Created event {}", eventId)`), not string concatenation. *Semgrep*
 - **JAVA-13** Queries use bound parameters: Spring Data method names, `@Query` with `:named` parameters, or the Criteria API. Never build SQL or JPQL by concatenation or formatting. *Semgrep (M0-16)*
 - **JAVA-14** IDs are UUID v7, created through the shared ID generator, never `UUID.randomUUID()` for entity IDs. *Semgrep*
+
+## Logging and tracing (LOG)
+
+- **LOG-1** Log through SLF4J. Add context as key-value pairs, not by building strings: `log.atInfo().addKeyValue("eventId", eventId).log("Event created")`. Key-values become separate fields in JSON logs. (See also JAVA-12.) *Semgrep (string concatenation), Review*
+- **LOG-2** Levels: **ERROR** = someone must act (a failure the app couldn't handle); **WARN** = unexpected but handled; **INFO** = meaningful business events (a user provisioned, an event copied) and the one request line; **DEBUG** = diagnostics, off by default. *Review*
+- **LOG-3** Never log tokens, passwords, email addresses, names, contact details, or request/response bodies. Log IDs instead (GEN-7). *Review*
+- **LOG-4** Log an exception once, where it's handled, with the exception as the last argument so the stack trace is kept. Don't log and rethrow (JAVA-11). *Review*
+- **LOG-5** Don't add trace or correlation IDs to messages by hand, and don't invent your own. Tracing puts `traceId` and `spanId` on every line automatically. *Review*
+- **LOG-6** Error responses carry the `traceId` and never a stack trace or internal detail. *Review, test (M0-27)*
+- **LOG-7** Frontend: no `console.log` in committed code. `console.warn` and `console.error` are allowed, and errors shown to the user include the reference (trace) ID. *ESLint (no-console), Review*
 
 ## Modules (MOD)
 
@@ -89,7 +102,7 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 - **TS-6** API calls use the generated client only. Never edit generated code. *Review*
 - **TS-7** Forms use React Hook Form with a Zod schema. Types come from the schema (`z.infer`), not a separate interface. *Review*
 - **TS-8** Use shadcn/ui components before writing custom ones. Style with Tailwind classes; no inline `style` and no separate CSS files except global styles. *Review*
-- **TS-9** Accessibility (WCAG 2.2 AA): every input has a label, every icon-only button has an accessible name, everything works by keyboard, and color is never the only signal. *ESLint (jsx-a11y), Review*
+- **TS-9** Accessibility (WCAG 2.2 AA): every input has a label, every icon-only button has an accessible name, everything works by keyboard, and color is never the only signal. *ESLint (jsx-a11y), axe (TEST-10), Review*
 - **TS-10** No `dangerouslySetInnerHTML`. *Semgrep (M0-16)*
 - **TS-11** Activity Types live in `src/activity-types/<type>/` and register in `registry.ts`. Core screens never import from a specific Activity Type. *Review*
 - **TS-12** Layouts are mobile-first: design for 360 px first, then add `md:` / `lg:` styles. *Review*
@@ -97,13 +110,28 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 ## Tests (TEST)
 
 - **TEST-1** Test names reference the criterion or requirement they prove: `M0_4_unauthenticatedApiCallReturns401`, `EVT5_copyShiftsAllActivityTimes`. *Review*
-- **TEST-2** Code and its tests change in the same commit. A bug fix includes a test that failed before the fix. *Review*
+- **TEST-2** **Test first** for domain rules, endpoints, and bug fixes (CLAUDE.md principle 5):
+  1. Write tests from the acceptance criteria. Run them and confirm they fail **on assertions**, not on compile errors. The test commit may include stubs (signatures that throw `UnsupportedOperationException` / `Error('not implemented')`) so the tests compile.
+  2. Commit them alone: `test(<module>): add failing tests for … [ID]`.
+  3. Implement until they pass, and commit: `feat(<module>): … [ID]`. Push after the green commit, so CI doesn't run on the red one.
+
+  A bug fix starts with a commit containing a test that reproduces the bug. Setup, configuration, and visual styling are exempt; for those, code and tests go in the same commit. *Review (commit order)*
+- **TEST-11** Never modify a committed test to make it pass. If a test seems wrong (for example, it misreads the spec), stop and ask. With approval, fix the test in its own commit (`test(<module>): correct … because …`) before changing the implementation. *Review*
 - **TEST-3** One behavior per test, laid out as arrange, act, assert. *Review*
 - **TEST-4** Backend integration tests use Testcontainers PostgreSQL, never H2 or another in-memory stand-in. *Review*
 - **TEST-5** React tests find elements the way a user would: `getByRole`, `getByLabelText`, then `getByText`. `getByTestId` only as a last resort. *ESLint (testing-library), Review*
 - **TEST-6** Frontend tests mock the network with MSW, not by mocking the API client module. *Review*
 - **TEST-7** No `Thread.sleep` or fixed timeouts. Wait for a condition (Awaitility, `findBy…`, Playwright auto-waiting). *Review*
 - **TEST-8** Tests don't depend on each other or on run order, and they clean up their own data. *Review*
+- **TEST-9** **Coverage is a floor, not a goal** (CLAUDE.md principle 7). Coverage stays at or above 80% line and 70% branch, on the backend and the frontend. Never write a test just to raise coverage: every test asserts behavior from the acceptance criteria, and a test that runs code without checking a result doesn't count. If coverage falls short, that points to an untested requirement or to dead code; find which. Don't lower thresholds or add coverage exclusions without asking. An approved exclusion carries its reason in the build config. The M0 exclusions (bootstrap entry points, generated code, copied shadcn/ui components) were approved in the M0 plan. *JaCoCo, Vitest coverage, Review*
+- **TEST-12** **When the coverage check fails**, don't retry blindly. Open the coverage report and sort each uncovered piece of code into one of four cases:
+  1. **An acceptance criterion without a test:** write that behavior test. *(Allowed without asking.)*
+  2. **Dead or speculative code** (GEN-10): delete it. *(Allowed without asking.)*
+  3. **Behavior the spec doesn't mention** (for example, a defensive error path): stop and ask whether it needs an acceptance criterion.
+  4. **Wiring that only runs at startup or in a real browser:** stop and propose an exclusion, with its reason.
+
+  Make **one pass** at cases 1 and 2. If the check still fails, stop and report: the uncovered lines, the case each belongs to, and the options. Asking here is the expected outcome, not a failure. Never loop on the number. *Review*
+- **TEST-10** Every page-level component has a component test that runs axe and expects no violations. New pages are added to the Playwright axe check. *axe-core, Review*
 
 ## AI features (AI)
 
@@ -115,5 +143,5 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 ## Git and pull requests (GIT)
 
 - **GIT-1** Commits follow Conventional Commits with requirement IDs: `feat(dining): add restaurant reviews [DIN-3]`. *Review*
-- **GIT-2** One task from `tasks.md` per commit: implement, test, commit. *Review*
+- **GIT-2** One task from `tasks.md` at a time: a test-first task has two commits (failing tests, then implementation), and an exempt task has one. *Review*
 - **GIT-3** A pull request covers one spec (or part of one), passes CI, and has had `/review-standards` run with no unresolved findings. *PR template*

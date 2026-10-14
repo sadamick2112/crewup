@@ -16,9 +16,10 @@ A shared memory log for long-running friend groups: plan get-togethers, log acti
 2. **Module boundaries are law.** Activity Type modules (`dining`, `boardgames`, `movies`) never import each other. They use only the published APIs of `events` and `groups`, plus application events.
 3. **Group-scoped everything.** Every group resource is under `/api/groups/{groupId}`, and every endpoint checks group permissions.
 4. **AI proposes, the user confirms.** AI never writes data without confirmation, and every AI feature has a manual fallback.
-5. **Tests prove requirements.** Test names reference requirement IDs. Write or update tests in the same change as the code.
-6. **Small steps.** One task from `tasks.md` at a time: implement, test, commit.
-7. **Standards are checked, not hoped for.** Code follows `docs/coding-standards.md`. Run the formatters before committing (`./mvnw spotless:apply`, `npm run format`), and run `/review-standards` before opening a pull request.
+5. **Test first for logic and APIs.** For domain rules, endpoints, and bug fixes: write tests from the acceptance criteria, run them to confirm they fail, commit, then implement. Never modify a committed test to make it pass; ask instead. Setup, configuration, and visual styling are exempt. Test names reference requirement IDs.
+6. **Small steps.** One task from `tasks.md` at a time. Test-first tasks: failing tests → commit → implement until green → commit. Exempt tasks: implement, test, commit.
+7. **Coverage is a floor, not a goal.** CI enforces thresholds (JaCoCo, Vitest). Never write a test just to raise coverage: every test asserts behavior from the acceptance criteria. Don't lower thresholds or add exclusions without asking. If the check fails, follow TEST-12 in `docs/coding-standards.md`: one pass at testing untested criteria and deleting dead code, then stop and report.
+8. **Standards are checked, not hoped for.** Code follows `docs/coding-standards.md`. Run the formatters before committing (`./mvnw spotless:apply`, `npm run format`), and run `/review-standards` before opening a pull request.
 
 ## Stack
 
@@ -32,7 +33,7 @@ Testing: JUnit 5, Testcontainers, Modulith tests, Vitest, React Testing Library,
 - Start dependencies: `docker compose up -d`
 - Backend (Maven, via the wrapper): `./mvnw spring-boot:run` · test: `./mvnw test` · full build with integration tests: `./mvnw verify`
 - Backend formatting: `./mvnw spotless:apply` (fix) · `./mvnw spotless:check` (check; also runs in `verify`)
-- Frontend: `npm run dev` · test: `npm test` · lint: `npm run lint` · format: `npm run format` · type check: `npm run typecheck`
+- Frontend: `npm run dev` · test: `npm test` · lint: `npm run lint` · format: `npm run format` · type check: `npm run typecheck` · coverage: `npm run test:coverage`
 - Standards review before a PR: `/review-standards`
 - Regenerate API client: `npm run gen:api`
 - End-to-end tests: `npm run e2e`

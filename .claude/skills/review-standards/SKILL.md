@@ -20,11 +20,14 @@ Review the changes on the current branch against `docs/coding-standards.md` and 
 
 3. **Run the automated checks** that exist in the project, and include their failures in the report. Skip any that aren't set up yet and say which were skipped.
    - Backend: `./mvnw -q spotless:check`
-   - Frontend (from the frontend directory): `npm run lint`, `npm run typecheck`
+   - Frontend (from the frontend directory): `npm run lint`, `npm run typecheck`, `npm run test:coverage` (coverage limits and axe checks)
    - Semgrep, if installed: `semgrep --config .semgrep --error`
 
 4. **Review against the rules marked *Review*.** Go through each changed file and apply every rule group relevant to it (for example, JAVA, MOD, API and TEST for a new controller and its tests). Also check:
    - every new behavior has a test, and test names reference requirement IDs (TEST-1, TEST-2)
+   - **test-first order (TEST-2, TEST-11):** for each test-first task, a `test(...)` commit with the failing tests comes before its `feat(...)` / `fix(...)` commit. Check that the implementation commit didn't change those tests: `git diff <test-commit> <impl-commit> -- <test files>` must be empty, unless an approved `test(...): correct …` commit sits in between
+   - new page-level components have an axe component test (TEST-10)
+   - **coverage (TEST-9):** any change to coverage thresholds or exclusions (`pom.xml` JaCoCo config, `vitest.config.ts`) was approved by the user and gives a reason; every new test asserts behavior tied to an acceptance criterion (no assertion-free tests, no tests that only call code to cover it); no speculative code that nothing uses yet (GEN-10)
    - the change traces to a task in the relevant `docs/specs/<feature>/tasks.md`
    - deliberate rule exceptions have a comment citing the rule ID; those are not findings
 
@@ -34,7 +37,7 @@ Review the changes on the current branch against `docs/coding-standards.md` and 
 
 Group findings by severity:
 
-- **Must fix:** security rules (GEN-6, GEN-7, JAVA-13, API-2, TS-10, AI-2), module boundaries (MOD-*), applied migrations edited (DB-2), missing tests (TEST-2), failing automated checks.
+- **Must fix:** security rules (GEN-6, GEN-7, JAVA-13, API-2, TS-10, AI-2), module boundaries (MOD-*), applied migrations edited (DB-2), missing tests or test-first order broken (TEST-2), committed tests changed to pass (TEST-11), lowered coverage thresholds or new exclusions without approval (TEST-9), failing automated checks.
 - **Should fix:** other rule violations.
 - **Consider:** suggestions that aren't rule violations. Keep these few.
 
