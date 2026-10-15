@@ -59,12 +59,12 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 
 ### T6 · Users and `GET /api/me` 🔴→🟢 [plan §5]
 **Red**
-- [ ] Tests: `M0_6_firstCallProvisionsUser`, `M0_6_laterCallsReturnSameUser`, `M0_6_profileRefreshesChangedClaims`, `M0_6_concurrentFirstCallsCreateOneUser`, unit tests for the display-name fallback. Stubs: the `UserProfile` record and a `MeController` / `UserProvisioningService` whose methods throw.
-- [ ] Run: all fail on assertions (500s, not compile errors). **Commit:** `test(identity): add failing tests for GET /api/me [M0-6]`
+- [x] Tests: `M0_6_firstCallProvisionsUser`, `M0_6_laterCallsReturnSameUser`, `M0_6_profileRefreshesChangedClaims`, `M0_6_concurrentFirstCallsCreateOneUser`, unit tests for the display-name fallback. Stubs: the `UserProfile` record and a `MeController` / `UserProvisioningService` whose methods throw.
+- [x] Run: all fail on assertions (500s, not compile errors). **Commit:** `test(identity): add failing tests for GET /api/me [M0-6]`
 
 **Green**
-- [ ] Migration `db/migration/identity/V20261014120000__identity_create_users.sql`.
-- [ ] `User` entity, `UserRepository`, `UserProvisioningService` (create, refresh changed claims, survive concurrent first calls), `MeController`.
+- [x] Migration `db/migration/identity/V20261014120000__identity_create_users.sql`.
+- [x] `User` entity, `UserRepository`, `UserProvisioningService` (create, refresh changed claims, survive concurrent first calls), `MeController`.
 
 **Done when:** tests pass without changes, and a manual `curl` with a real Keycloak token returns the profile (`TOKEN=$(python3 infra/keycloak/get-dev-token.py)`). **Commit:** `feat(identity): provision user and add GET /api/me [M0-6, ACC-1]`
 

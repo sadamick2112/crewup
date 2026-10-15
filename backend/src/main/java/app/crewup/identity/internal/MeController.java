@@ -8,8 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 class MeController {
 
+    private final UserProvisioningService provisioning;
+
+    MeController(UserProvisioningService provisioning) {
+        this.provisioning = provisioning;
+    }
+
     @GetMapping("/api/me")
     UserProfile me(@AuthenticationPrincipal Jwt jwt) {
-        throw new UnsupportedOperationException("not implemented");
+        return UserProfile.from(provisioning.currentUser(jwt));
     }
 }
