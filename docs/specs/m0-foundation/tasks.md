@@ -48,12 +48,12 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 
 ### T5 · Security 🔴→🟢 [plan §5]
 **Red**
-- [ ] Tests: `M0_4_unauthenticatedApiCallReturns401WithProblemDetails`, `M0_4_tokenWithWrongAudienceIsRejected`, `M0_4_validTokenIsAccepted` (against a test-only `/api` probe endpoint), `M0_4_deniedRequestReturns403WithProblemDetails` (an authenticated call outside `/api/**`; API-4), plus health still public.
-- [ ] Run: the 401/Problem Details and audience tests fail. **Commit:** `test(security): add failing tests for API authentication [M0-4]`
+- [x] Tests: `M0_4_unauthenticatedApiCallReturns401WithProblemDetails`, `M0_4_tokenWithWrongAudienceIsRejected`, `M0_4_validTokenIsAccepted` (against a test-only `/api` probe endpoint), `M0_4_deniedRequestReturns403WithProblemDetails` (an authenticated call outside `/api/**`; API-4), plus health still public.
+- [x] Run: the 401/Problem Details and audience tests fail. **Commit:** `test(security): add failing tests for API authentication [M0-4]`
 
 **Green**
-- [ ] `SecurityConfig`: stateless, JWT resource server (issuer from `.env`), `crewup-api` audience validator, public health and OpenAPI endpoints, `/api/**` authenticated, everything else denied, CSRF off with a `nosemgrep` reason citing ADR-004.
-- [ ] Problem Details `AuthenticationEntryPoint` and `AccessDeniedHandler`. No `@RestControllerAdvice` yet; it arrives with the first domain exception (GEN-10).
+- [x] `SecurityConfig`: stateless, JWT resource server (issuer from `.env`), `crewup-api` audience validator, public health and OpenAPI endpoints, `/api/**` authenticated, everything else denied, CSRF off with a `nosemgrep` reason citing ADR-004.
+- [x] Problem Details `AuthenticationEntryPoint` and `AccessDeniedHandler`. No `@RestControllerAdvice` yet; it arrives with the first domain exception (GEN-10).
 
 **Done when:** tests pass without changes. **Commit:** `feat(security): secure API as OIDC resource server [M0-4]`
 

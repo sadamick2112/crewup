@@ -18,6 +18,14 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${CREWUP_OIDC_ISSUER_URI}
+          # Rejects tokens issued for other clients (M0-4). Boot applies this only to the JwtDecoder it builds:
+          # if a custom JwtDecoder bean is ever added, it must add this audience check itself.
+          audiences: crewup-api
 
 management:
   endpoints:
