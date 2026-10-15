@@ -38,11 +38,11 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 
 ### T4 · UUID v7 IDs 🔴→🟢 [plan §5]
 **Red**
-- [ ] `IdsTest`: version 7 and the RFC variant bits, the embedded timestamp matches the clock, IDs from later milliseconds sort after earlier ones, no duplicates in a large batch. Stub `Ids.newId()` throws.
-- [ ] Run: all fail on assertions. **Commit:** `test(shared): add failing tests for UUID v7 ids [JAVA-14]`
+- [x] `IdsTest`: version 7 and the RFC variant bits, the embedded timestamp matches the clock, IDs from later milliseconds sort after earlier ones, no duplicates in a large batch. Stub `Ids.newId()` throws.
+- [x] Run: all fail on assertions. **Commit:** `test(shared): add failing tests for UUID v7 ids [JAVA-14]`
 
 **Green**
-- [ ] Implement `app.crewup.shared.Ids.newId()`, and `shared/package-info.java` with `@ApplicationModule(type = OPEN)`.
+- [x] Implement `app.crewup.shared.Ids.newId()`, and `shared/package-info.java` with `@ApplicationModule(type = OPEN)`.
 
 **Done when:** tests pass without changes. **Commit:** `feat(shared): add UUID v7 id generator [JAVA-14]`
 
