@@ -7,14 +7,16 @@ import java.lang.annotation.Target;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
- * Full application context against Testcontainers PostgreSQL, with MockMvc. Every integration test uses this same
- * annotation so Spring caches one context (and one container) for the whole test run.
+ * Full application context against Testcontainers PostgreSQL and the {@link TestOidcProvider}, with MockMvc. Every
+ * integration test uses this same annotation so Spring caches one context (and one container) for the whole test run.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(TestcontainersConfiguration.class)
+@Import({TestcontainersConfiguration.class, ApiProbeController.class})
+@ContextConfiguration(initializers = TestOidcProviderInitializer.class)
 public @interface IntegrationTest {}
