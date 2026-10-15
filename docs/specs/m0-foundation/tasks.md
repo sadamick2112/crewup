@@ -88,6 +88,7 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 
 ### T9 · Frontend scaffold [plan §6, §8]
 - [ ] Vite `react-ts` in `frontend/`, strict TS, `@/` alias, `engines` from `.nvmrc`, and a `/api` proxy to :8080.
+- [ ] Backend port overridable in `.env` (plan §4; gap left by T3): `server.port: ${CREWUP_BACKEND_PORT:8080}` in `application.yml`, `CREWUP_BACKEND_PORT` with a comment in `.env.example`, and the Vite proxy target reads the same variable.
 - [ ] Tailwind 4, then `shadcn init` and `shadcn add button card` (into `src/shared/ui/`).
 - [ ] ESLint flat config (including `no-console` allowing only `warn`/`error`, LOG-7), Prettier (with the Tailwind plugin), and scripts `lint`, `format`, `format:check`, `typecheck`, `test` (M0-21).
 - [ ] Vitest + jsdom + RTL + MSW setup, with one smoke test rendering the shadcn Button.
