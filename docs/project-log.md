@@ -4,6 +4,23 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-15 · T4–T6 done (T7 next)
+
+**Decided**
+1. **Problem Details `type` URIs are URNs:** `urn:crewup:problem:<kind>` (API-4). No domain is needed; RFC 9457 allows non-resolvable URIs. So far: `unauthenticated` (401), `access-denied` (403). Spring's own MVC errors (e.g. 404) still use the default `about:blank`.
+2. **Backend tests use a fake Keycloak** (`TestOidcProvider`: JDK `HttpServer`, RSA key generated per run, serves OIDC discovery and the JWKS). `@IntegrationTest` points `issuer-uri` at it, so tests run the production decoder: signature, issuer, expiry and the `crewup-api` audience. A public-key file was rejected because Boot then builds a different decoder (only when `issuer-uri` is unset) that skips the issuer check. Tests that only need *a* signed-in user use spring-security-test's `jwt()`; `ApiSecurityTest` stays the one place that tests token validation.
+3. **Display name with no name claims** (no `name`, `preferred_username` or `email`): the placeholder "CrewUp user"; the next token with a name replaces it.
+4. **First-call provisioning uses `INSERT … ON CONFLICT (subject) DO NOTHING`** then re-reads, instead of catching the unique-constraint error as plan §5 described. In PostgreSQL a failed insert aborts the transaction, so that re-read would fail. The concurrency test covers the lost-insert branch reliably.
+5. **`UUID.randomUUID()` is never used, even in tests:** test-unique values use `Ids.newId()` (anticipating T14's `no-random-uuid-for-entity-ids` rule).
+
+**Learned**
+- `/error` is public in `SecurityConfig`: Spring Boot renders unhandled exceptions there, and denying it would turn a 500 into a 403. MockMvc doesn't exercise this.
+- A 401 carries `WWW-Authenticate: Bearer` (adds `error="invalid_token"` for a rejected token, never the reason).
+- Spotless wraps long comments. `nosemgrep` must be on the line directly above the finding, so keep it short and put the reason on its own line.
+- Security and Problem Details classes live in the root package `app.crewup` for now. T7 moves the Problem Details writing into `shared.ProblemDetailsSupport`.
+- `./mvnw spring-boot:run` fails with "Port 8080 was already in use" if an earlier run is still going; stop it with Ctrl+C (graceful), or `kill <pid>` (also graceful).
+- Backend port override via `.env` was deferred to T9 (added to its checklist).
+
 ## 2026-10-14 · T3 backend scaffold done (T4 next)
 
 **Learned while scaffolding** (Boot 4.1.1, generated from start.spring.io and trimmed to plan §3)
