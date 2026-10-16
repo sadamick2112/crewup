@@ -25,7 +25,7 @@ class SecurityConfig {
                 // nosemgrep: java.spring.security.audit.spring-csrf-disabled.spring-csrf-disabled
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests.requestMatchers(
-                                "/actuator/health", "/v3/api-docs/**", "/swagger-ui/**")
+                                "/actuator/health", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**")
                         .permitAll()
                         // Spring Boot renders unhandled exceptions on /error; denying it would turn a 500 into a 403.
                         .requestMatchers("/error")

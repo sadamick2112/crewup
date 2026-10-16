@@ -81,7 +81,7 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 
 ### T8 · OpenAPI contract [plan §5]
 - [ ] springdoc configured (API title, bearer-auth security scheme). `/api/me` documented with responses 200 and 401.
-- [ ] Fix: `/swagger-ui.html` (springdoc's redirect to `/swagger-ui/index.html`) returns 401 because `SecurityConfig` doesn't list it as public (found after T6). A bug fix, so test first (TEST-2): a failing test that it redirects without a token, its own commit, then the one-line fix.
+- [x] Fix: `/swagger-ui.html` (springdoc's redirect to `/swagger-ui/index.html`) returns 401 because `SecurityConfig` doesn't list it as public (found after T6). A bug fix, so test first (TEST-2): a failing test that it redirects without a token, its own commit, then the one-line fix.
 - [ ] `OpenApiContractTest` with `M0_9_openApiContractIsUpToDate`, and the `-Dopenapi.update=true` mode.
 - [ ] Generate and commit `api/openapi.json`.
 
