@@ -4,6 +4,20 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-16 · T7 done (T8 next)
+
+**Decided**
+1. **Readable local logs show key-values:** `logging.pattern.console` is Boot's default pattern plus `%kvp` (e.g. `… : Request completed http.method="GET" http.route="/api/me" …`). The developer compared real output of Boot's default, default + `%kvp`, and ECS JSON before choosing. JSON (`LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs`) writes key-values as fields.
+2. **Requests with no matched route log `http.route="UNMATCHED"`** (401s, unknown paths), never the raw URL. Every `/api` request is logged, so `RequestLoggingFilter` wraps the security filters (plan §5 had it after them, which would skip 401s) and reads the subject from the request-attribute security context.
+3. **Request-line field names stay as in the plan** (`http.method`, `http.route`, `http.status`, `durationMs`, `subject`), not ECS's `http.request.method` etc.; revisit when a log platform arrives.
+4. **Static resource mappings are off** (`spring.web.resources.add-mappings: false`): otherwise the catch-all `/**` handler matched unknown paths (route `/**`). springdoc serves Swagger UI with its own handler.
+
+**Learned**
+- Boot 4 needs `spring-boot-micrometer-tracing-opentelemetry` next to the bridge (plan §3 updated). Boot 4 tests turn off only trace *export*, not tracing, so no test annotation is needed.
+- Boot's ECS output puts trace IDs in `traceId`/`spanId` (not ECS's `trace.id`) and key-values as top-level fields.
+- Logging tests run in their own context with ECS output and parse fields (`JsonLogLines`); the Postgres container is now one per test run, so that second context doesn't start another database.
+- When checking logs by hand, don't truncate lines (`cut -c…`): the request line's `subject` is at the end, and a truncated line looked like a bug.
+
 ## 2026-10-15 · T4–T6 done (T7 next)
 
 **Decided**
