@@ -64,6 +64,15 @@ public final class TestOidcProvider {
 
     /** Identical to {@link #validToken()} except for the audience, so a rejection can only come from the audience. */
     public String token(String audience) {
+        return sign(audience, Map.of());
+    }
+
+    /** A token the backend should accept, carrying profile claims such as {@code name} and {@code email}. */
+    public String validTokenWithClaims(Map<String, Object> profileClaims) {
+        return sign(API_AUDIENCE, profileClaims);
+    }
+
+    private String sign(String audience, Map<String, Object> profileClaims) {
         Instant now = Instant.now();
         var claims = JwtClaimsSet.builder()
                 .issuer(issuer)
@@ -71,6 +80,7 @@ public final class TestOidcProvider {
                 .audience(List.of(audience))
                 .issuedAt(now)
                 .expiresAt(now.plus(Duration.ofMinutes(5)))
+                .claims(all -> all.putAll(profileClaims))
                 .build();
         var header = JwsHeader.with(SignatureAlgorithm.RS256).keyId(KEY_ID).build();
         return encoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();

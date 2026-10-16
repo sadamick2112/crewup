@@ -68,6 +68,16 @@
             <artifactId>spring-modulith-starter-jpa</artifactId>
         </dependency>
         <dependency>
+            <!-- Boot 4 keeps tracing auto-configuration in its own module; the bridge alone does nothing. -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-micrometer-tracing-opentelemetry</artifactId>
+        </dependency>
+        <dependency>
+            <!-- W3C trace context and traceId/spanId in logs (M0-27), with no exporter (plan §2). -->
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
