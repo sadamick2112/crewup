@@ -80,10 +80,10 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 **Done when:** tests pass without changes, `./mvnw verify` passes with coverage, and a manual `curl -H "Authorization: Bearer $TOKEN" -H 'traceparent: 00-<id>-<span>-01' localhost:8080/api/me` (token from `infra/keycloak/get-dev-token.py`) shows that trace ID in the backend log line. **Commit:** `feat(shared): add request logging and W3C trace correlation [M0-26, M0-27, NFR-9]`
 
 ### T8 · OpenAPI contract [plan §5]
-- [ ] springdoc configured (API title, bearer-auth security scheme). `/api/me` documented with responses 200 and 401.
+- [x] springdoc configured (API title, bearer-auth security scheme). `/api/me` documented with responses 200 and 401.
 - [x] Fix: `/swagger-ui.html` (springdoc's redirect to `/swagger-ui/index.html`) returns 401 because `SecurityConfig` doesn't list it as public (found after T6). A bug fix, so test first (TEST-2): a failing test that it redirects without a token, its own commit, then the one-line fix.
-- [ ] `OpenApiContractTest` with `M0_9_openApiContractIsUpToDate`, and the `-Dopenapi.update=true` mode.
-- [ ] Generate and commit `api/openapi.json`.
+- [x] `OpenApiContractTest` with `M0_9_openApiContractIsUpToDate`, and the `-Dopenapi.update=true` mode.
+- [x] Generate and commit `api/openapi.json`.
 
 **Done when:** the test passes, and fails after a deliberate change to `UserProfile` (then revert). **Commit:** `feat(api): publish OpenAPI contract with drift test [M0-9]`
 
