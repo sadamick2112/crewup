@@ -18,6 +18,11 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  web:
+    resources:
+      # The API serves no static files. Without the catch-all /** resource handler, an unknown /api path matches no
+      # route (logged as UNMATCHED) and gets a 404 Problem Details. springdoc serves Swagger UI with its own handler.
+      add-mappings: false
   security:
     oauth2:
       resourceserver:
@@ -37,3 +42,20 @@ management:
       # Component names and status (db, ping) are public; details such as the database product are not.
       show-components: always
       show-details: never
+  tracing:
+    # W3C traceparent in and out (M0-27). Sampling only matters once an exporter exists; trace IDs are always logged.
+    propagation:
+      type: w3c
+    sampling:
+      probability: 1.0
+
+logging:
+  # Overridable per environment, e.g. LOGGING_LEVEL_APP_CREWUP=DEBUG.
+  level:
+    root: INFO
+    app.crewup: INFO
+  # Boot's default console pattern plus %kvp, so key-values (LOG-1) show in readable local logs. JSON logs
+  # (LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs) ignore this pattern and write key-values as fields. \${PID:-} is escaped
+  # so Logback, not Spring, resolves it.
+  pattern:
+    console: '%clr(%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX}){faint} %clr(%5p){} %clr(\${PID:-}){magenta} %clr(--- %esb(){APPLICATION_NAME}%esb{APPLICATION_GROUP}[%15.15t] %correlationId){faint}%clr(%-40.40logger{39}){cyan} %clr(:){faint} %m %kvp%n%wEx'

@@ -70,12 +70,12 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 
 ### T7 · Logging and request tracing 🔴→🟢 [plan §5]
 **Red**
-- [ ] Add the tracing dependency (setup, in this commit). Tests, capturing log output with `OutputCaptureExtension`: `M0_26_apiRequestIsLoggedOnceWithRouteStatusAndDuration`, `M0_26_requestLogContainsNoPersonalDataOrToken`, `M0_26_logsAreEcsJsonWhenStructuredFormatIsOn`, `M0_27_incomingTraceparentIsContinued`, `M0_27_newTraceStartsWithoutTraceparent`, `M0_27_problemDetailsIncludeTraceId` (401 and 403). Stubs: an empty `RequestLoggingFilter` and a `ProblemDetailsSupport` that throws.
-- [ ] Run: all fail on assertions. **Commit:** `test(shared): add failing tests for request logging and tracing [M0-26, M0-27]`
+- [x] Add the tracing dependency (setup, in this commit). Tests, capturing log output with `OutputCaptureExtension`: `M0_26_apiRequestIsLoggedOnceWithRouteStatusAndDuration`, `M0_26_requestLogContainsNoPersonalDataOrToken`, `M0_26_logsAreEcsJsonWhenStructuredFormatIsOn`, `M0_27_incomingTraceparentIsContinued`, `M0_27_newTraceStartsWithoutTraceparent`, `M0_27_problemDetailsIncludeTraceId` (401 and 403). Stubs: an empty `RequestLoggingFilter` and a `ProblemDetailsSupport` that throws.
+- [x] Run: all fail on assertions. **Commit:** `test(shared): add failing tests for request logging and tracing [M0-26, M0-27]`
 
 **Green**
-- [ ] `RequestLoggingFilter` (one INFO line, key-values only, `/api/**` only), `ProblemDetailsSupport` used by the security handlers, and a `ResponseBodyAdvice<ProblemDetail>`.
-- [ ] `application.yml`: log levels, W3C propagation, sampling 1.0; ECS JSON via `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` (documented in `.env.example`).
+- [x] `RequestLoggingFilter` (one INFO line, key-values only, `/api/**` only), `ProblemDetailsSupport` used by the security handlers, and a `ResponseBodyAdvice<ProblemDetail>`.
+- [x] `application.yml`: log levels, W3C propagation, sampling 1.0; ECS JSON via `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` (documented in `.env.example`).
 
 **Done when:** tests pass without changes, `./mvnw verify` passes with coverage, and a manual `curl -H "Authorization: Bearer $TOKEN" -H 'traceparent: 00-<id>-<span>-01' localhost:8080/api/me` (token from `infra/keycloak/get-dev-token.py`) shows that trace ID in the backend log line. **Commit:** `feat(shared): add request logging and W3C trace correlation [M0-26, M0-27, NFR-9]`
 

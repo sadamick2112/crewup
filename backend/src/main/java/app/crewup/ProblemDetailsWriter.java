@@ -1,5 +1,6 @@
 package app.crewup;
 
+import app.crewup.shared.ProblemDetailsSupport;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -19,6 +20,11 @@ import org.springframework.stereotype.Component;
 class ProblemDetailsWriter {
 
     private final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
+    private final ProblemDetailsSupport problemDetails;
+
+    ProblemDetailsWriter(ProblemDetailsSupport problemDetails) {
+        this.problemDetails = problemDetails;
+    }
 
     void write(HttpServletRequest request, HttpServletResponse response, HttpStatus status, String type, String detail)
             throws IOException {
@@ -27,6 +33,9 @@ class ProblemDetailsWriter {
         problem.setInstance(URI.create(request.getRequestURI()));
 
         response.setStatus(status.value());
-        converter.write(problem, MediaType.APPLICATION_PROBLEM_JSON, new ServletServerHttpResponse(response));
+        converter.write(
+                problemDetails.withTraceId(problem),
+                MediaType.APPLICATION_PROBLEM_JSON,
+                new ServletServerHttpResponse(response));
     }
 }
