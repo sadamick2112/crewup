@@ -53,3 +53,5 @@ CrewUp App.docx
 .env.*
 !.env.example
 application-local.yml
+.vscode/launch.json
+.vscode/settings.json
