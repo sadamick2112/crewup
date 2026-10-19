@@ -88,13 +88,13 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 **Done when:** the test passes, and fails after a deliberate change to `UserProfile` (then revert). **Commit:** `feat(api): publish OpenAPI contract with drift test [M0-9]`
 
 ### T9 · Frontend scaffold [plan §6, §8]
-- [ ] Vite `react-ts` in `frontend/`, strict TS, `@/` alias, `engines` from `.nvmrc`, and a `/api` proxy to :8080.
-- [ ] Backend port overridable in `.env` (plan §4; gap left by T3): `server.port: ${CREWUP_BACKEND_PORT:8080}` in `application.yml`, `CREWUP_BACKEND_PORT` with a comment in `.env.example`, and the Vite proxy target reads the same variable.
-- [ ] Tailwind 4, then `shadcn init` and `shadcn add button card` (into `src/shared/ui/`).
-- [ ] ESLint flat config (including `no-console` allowing only `warn`/`error`, LOG-7), Prettier (with the Tailwind plugin), and scripts `lint`, `format`, `format:check`, `typecheck`, `test` (M0-21).
-- [ ] Vitest + jsdom + RTL + MSW setup, with one smoke test rendering the shadcn Button.
-- [ ] Vitest V8 coverage with thresholds (lines 80, branches 70), exclusions with reasons, and the `test:coverage` script (M0-24).
-- [ ] `src/test/axe.ts` with `expectNoAxeViolations()`, used in the smoke test (M0-25).
+- [x] Vite `react-ts` in `frontend/`, strict TS, `@/` alias, `engines` from `.nvmrc`, and a `/api` proxy to :8080.
+- [x] Backend port overridable in `.env` (plan §4; gap left by T3): `server.port: ${CREWUP_BACKEND_PORT:8080}` in `application.yml`, `CREWUP_BACKEND_PORT` with a comment in `.env.example`, and the Vite proxy target reads the same variable.
+- [x] Tailwind 4, then `shadcn init` and `shadcn add button card` (into shadcn's default `src/components/ui/`, decided in T9).
+- [x] ESLint flat config (including `no-console` allowing only `warn`/`error`, LOG-7), Prettier (with the Tailwind plugin), and scripts `lint`, `format`, `format:check`, `typecheck`, `test` (M0-21).
+- [x] Vitest + jsdom + RTL + MSW setup, with one smoke test rendering the shadcn Button.
+- [x] Vitest V8 coverage with thresholds (lines 80, branches 70), exclusions with reasons, and the `test:coverage` script (M0-24).
+- [x] `src/test/axe.ts` with `expectNoAxeViolations()`, used in the smoke test (M0-25).
 
 **Done when:** `npm run lint && npm run format:check && npm run typecheck && npm run test:coverage && npm run build` passes, and a deliberately inaccessible element (an unlabeled input) makes the axe helper fail (then remove it). **Commit:** `feat(frontend): scaffold React app with Tailwind, shadcn/ui and tooling [M0-10, M0-21, M0-24, M0-25]`
 

@@ -1,0 +1,5 @@
+# Generated output (also in the root .gitignore, which Prettier doesn't read from here)
+coverage
+dist
+# npm writes this file; formatting it would only create noise.
+package-lock.json

@@ -1,0 +1,2 @@
+# Vite local env files (repo-wide ignores live in the root .gitignore)
+*.local

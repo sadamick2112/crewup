@@ -1,3 +1,7 @@
+server:
+  # Overridable in .env (plan §4); the Vite dev server's /api proxy reads the same variable.
+  port: ${CREWUP_BACKEND_PORT:8080}
+
 spring:
   application:
     name: crewup

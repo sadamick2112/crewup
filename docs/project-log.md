@@ -4,6 +4,26 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-19 · T9 done: frontend scaffold and a version rule (T10 next)
+
+**Decided**
+1. **Version rule** (plan §2, replacing "newest of everything"): versions must be industry standard, modern, not deprecated, and compatible without workarounds. That means the most used major (npm per-version weekly downloads) at its latest non-deprecated release. The developer wants the app to show how modern applications are built, and "modern" doesn't mean "latest". Measure with data (`api.npmjs.org/versions/<pkg>/last-week`, `npm view <pkg>@<v> deprecated`), not memory or another assistant's list. A list from Copilot (Next.js 15.1, TS 5.6, Tailwind 3.4) matched early 2025, not the download data.
+2. **Frontend versions changed** under that rule: Vitest 5 → 4.1.12, MSW 3 → 2.15.0, React Router 8 → 7.18.4 (T11), plus latest patches. jest-dom stays 7.0.1 because 6.10.0 is deprecated. TypeScript 5.9.3 and ESLint 9.39.5 stay; plan §2 gives the measured reasons.
+3. **TypeScript 7 was tried and declined.** TS 7 has no JS API until 7.1, so `typescript-eslint` refuses to start and `openapi-typescript` crashes. The TypeScript team's side-by-side install (TS 7 `tsc` plus `@typescript/typescript6` aliased as `typescript`) worked in a scratch copy, but it needs aliases and overrides.
+4. **ESLint 9 is the one known exception to "not deprecated"** (end of life since 2026-08-06). jsx-a11y doesn't support ESLint 10 yet ([#1075](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/issues/1075)). The `jsx-a11y-x` fork (niche, 0.x) and an npm override (a workaround) were declined. Revisit when #1075 ships.
+5. **shadcn defaults:** components in `src/components/ui`, helper in `src/lib/utils.ts` (not plan §1's `src/shared/ui`), Radix base, Nova preset. shadcn's own `cn` package stays, because registry components import it directly, so swapping in `clsx` + `tailwind-merge` would mean editing every added component.
+6. **Prettier uses its defaults** (double quotes, semicolons; TS-1), plus the Tailwind plugin.
+
+**Learned**
+- create-vite 9.3's `react-ts` template now ships oxlint and TypeScript 7 (where `strict` is the default). We replaced both per the plan and set `"strict": true` explicitly.
+- `shadcn add` re-adds `cn` to `package.json` and bumps `shadcn` to `^latest`. After running it, check `package.json` and pin exact versions again.
+- Vite 8's `resolve.tsconfigPaths: true` reads the `@/` alias from `tsconfig.app.json`; the shadcn CLI also needs `paths` in the root `tsconfig.json`.
+- Vitest globals are off, so Testing Library can't clean up automatically. `src/test/setup.ts` calls `cleanup()` (checked: without it a render leaks into the next test), with the lint rule disabled on that line and the reason.
+- Coverage currently measures 0 of 0 lines (everything in `src/` is an approved exclusion), and an untested file made the gate fail as expected. T10 adds the first measured code and the `schema.d.ts` exclusion.
+- `npm audit` reports 7 high findings, all one `braces` advisory reached through the `shadcn` CLI (dev only, no fixed version; `audit fix --force` would downgrade shadcn to 1.0). For T15's triage.
+- npm 11 warns that MSW's postinstall script isn't in `allowScripts`. It only copies the browser worker, which the Node tests don't use.
+- The Vite proxy reads `CREWUP_BACKEND_PORT` from the repo root `.env` (or the environment), checked by hand against a stub server. `.env` files copied before T9 don't have the variable, which is fine because both sides default to 8080.
+
 ## 2026-10-19 · Handoff: backend done (T1–T8), frontend starts with T9
 
 **Where things stand**
