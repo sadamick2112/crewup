@@ -4,6 +4,20 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-19 · T8 done; milestone tags (T9 next)
+
+**Decided**
+1. **Milestone tags keep snapshots to look back on** (this is also a learning project: how an app grows step by step with Claude Code). Annotated tags, never moved or reused: `git tag -a <name> <commit> -m "<what it marks>"`, pushed separately with `git push origin <name>`.
+   - `m0-backend-done` → `521f895`: backend skeleton (T1–T8).
+   - Planned: `m0-frontend-done` after T11, `m0-done` on the merge to `main`, then one per milestone (or notable stage) from M1.
+   - Browse with `git checkout <tag>` (detached HEAD; `git switch -` to return) or under *Tags* on GitHub. Commit history and this log fill in the steps between tags.
+2. **No CI until T13, by plan order.** GitHub Actions is enabled on the repo, but no workflow exists yet; the developer chose not to pull a backend job forward.
+
+**Learned (T8)**
+- `shared.ProblemDetailSchema` documents the error body for OpenAPI, because Spring's `ProblemDetail` class would show a nested `properties` map instead of the top-level `traceId`. It's documentation only, so its one line is uncovered.
+- The OpenAPI server URL is `/`, so the contract doesn't depend on host or port. `ApiProbeController` is `@Hidden` to keep it out of the contract.
+- Regenerate the contract: `cd backend && ./mvnw test -Dtest=OpenApiContractTest -Dopenapi.update=true`.
+
 ## 2026-10-16 · T7 done (T8 next)
 
 **Decided**
