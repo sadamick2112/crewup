@@ -4,6 +4,21 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-22 · T13 done: CI workflow (T14 next)
+
+**Decided**
+1. **Triggers stay as plan §9 says: pull requests to `main` and pushes to `main`.** The developer asked what the industry standard is. Their previous job's "CI" was a deployed Kubernetes namespace; here CI means checks on each change before it merges, and deploying to an environment is M8's CD. Feature branches get CI through a PR, so **draft PR [#1](https://github.com/sadamick2112/crewup/pull/1) (`feat/m0-foundation` → `main`) is open now**. T17 marks it ready instead of opening a new one. Rejected: running on pushes to every branch (each push to an open PR would run twice).
+2. **Concurrency:** a newer push to a PR cancels the outdated run; runs on `main` are never cancelled. Jobs get `contents: read` only, and timeouts of 20/15/10 minutes.
+3. **Actions pinned by commit SHA** with a version comment: `actions/checkout` v7.0.1, `actions/setup-java` v6.1.0, `actions/setup-node` v7.1.0, `actions/upload-artifact` v7.0.2. Each is the latest release of its current major, checked with `gh api repos/<action>/releases/latest`. The pinned SHA is the commit the tag points to (annotated tags dereferenced).
+4. **Coverage tables** use inline scripts: awk over JaCoCo's CSV, Node over Vitest's `coverage-summary.json`. The summary and upload steps run `if: !cancelled()` when the report exists, so a run that fails the coverage gate still shows its numbers.
+
+**Learned**
+- First run on PR #1: all three jobs green (backend about 1.5 min, frontend 45 s, api-client 23 s); artifacts `backend-coverage` and `frontend-coverage` uploaded.
+- Failure check on a throwaway draft PR (#2, closed, branch deleted): `backend` failed in `IdsTest` (an assertion changed to version 4), `frontend` at `lint` (`no-console`), and `api-client` at the diff check (a hand edit to `schema.d.ts`).
+- Run locally first: the jobs only call project scripts, so the same commands give the same answer. [`act`](https://github.com/nektos/act) can run `ci.yml` itself in Docker; not installed, and worth considering in M8 when the workflow grows.
+- `actionlint` (Docker image `rhysd/actionlint`) checks workflow files, including shellcheck on `run:` scripts. A Node script inside shell single quotes trips SC2016 because of JS template strings; a quoted heredoc (`node - <<'EOF'`) avoids it.
+- Watching CI from the terminal: `gh pr checks`, `gh run watch`, `gh run view --log-failed`.
+
 ## 2026-10-22 · T12 done: end-to-end sign-in test (T13 next)
 
 **Decided**

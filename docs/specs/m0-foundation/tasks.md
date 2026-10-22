@@ -128,8 +128,8 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 **Done when:** `npm run e2e` passes locally. **Commit:** `test(e2e): add sign-in journey test with accessibility checks [M0-1, M0-5, M0-7, M0-11, M0-13, M0-25]`
 
 ### T13 · CI workflow [plan §9]
-- [ ] `.github/workflows/ci.yml` with jobs `backend`, `frontend` (runs `test:coverage`), `api-client`, actions pinned by SHA.
-- [ ] Coverage tables in the job summaries, and HTML coverage reports uploaded as artifacts (M0-24).
+- [x] `.github/workflows/ci.yml` with jobs `backend`, `frontend` (runs `test:coverage`), `api-client`, actions pinned by SHA.
+- [x] Coverage tables in the job summaries, and HTML coverage reports uploaded as artifacts (M0-24).
 
 **Done when:** all three jobs pass on GitHub, and each fails once on a throwaway branch with a deliberate error. **Commit:** `ci: add build, test, lint and coverage workflow [M0-12, M0-24]`
 
