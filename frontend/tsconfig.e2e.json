@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.e2e.tsbuildinfo",
+    "target": "es2023",
+    /* DOM: callbacks passed to page.evaluate() run in the browser. */
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"],
+    "skipLibCheck": true,
+
+    /* Playwright compiles these files itself; this config is for type checking and ESLint only. */
+    "module": "nodenext",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["playwright.config.ts", "e2e"]
+}

@@ -121,9 +121,9 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 **Done when:** tests pass without changes, and the full flow works by hand with the stack running (sign in, greeting, reload stays signed in, sign out). **Commit:** `feat(frontend): sign in with OIDC + PKCE and greet the user [M0-5, M0-7, M0-11, M0-25, M0-28, ACC-1]`
 
 ### T12 · End-to-end test [plan §10]
-- [ ] Playwright config (Chromium, Vite as `webServer`, expects backend and Compose running), and the `e2e` script.
-- [ ] `e2e/m0-1-5-7-sign-in.spec.ts`: dev user signs in, sees the greeting, reloads and stays signed in, signs out; a 360×740 viewport has no horizontal scroll.
-- [ ] `@axe-core/playwright` checks of the home page, signed out and signed in, at 1280 px and 360 px, with zero violations (M0-25).
+- [x] Playwright config (Chromium, Vite as `webServer`, expects backend and Compose running), and the `e2e` script.
+- [x] `e2e/m0-1-5-7-sign-in.spec.ts`: dev user signs in, sees the greeting, reloads and stays signed in, signs out; a 360×740 viewport has no horizontal scroll.
+- [x] `@axe-core/playwright` checks of the home page, signed out and signed in, at 1280 px and 360 px, with zero violations (M0-25).
 
 **Done when:** `npm run e2e` passes locally. **Commit:** `test(e2e): add sign-in journey test with accessibility checks [M0-1, M0-5, M0-7, M0-11, M0-13, M0-25]`
 

@@ -4,6 +4,22 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-22 · T12 done: end-to-end sign-in test (T13 next)
+
+**Decided**
+1. **Four tests instead of one long journey** (TEST-3, one behavior per test): sign in and out, reload stays signed in, and the layout + axe checks at 1280 and 360 px signed out and signed in. Each test gets a new browser context (no tokens, no Keycloak session) and signs in itself; a sign-in takes about a second.
+2. **Sign-out also proves the Keycloak session ended:** after "Sign out", a reload (which tries a silent sign-in) still shows "Sign in".
+3. **`e2e/global-setup.ts` checks Keycloak and the backend before any test** and fails with how to start them, instead of a timeout mid-test. It reads `CREWUP_BACKEND_PORT` and `CREWUP_OIDC_ISSUER_URI` like `vite.config.ts`. Vite is started by Playwright (`webServer`), or reused if `npm run dev` is already running.
+4. **Wiring:** `tsconfig.e2e.json` (DOM lib, because `page.evaluate` callbacks run in the browser) is referenced from `tsconfig.json`, so `typecheck` and ESLint cover `e2e/` and `playwright.config.ts`. Vitest now includes only `src/**/*.test.{ts,tsx}` (its default pattern would pick up `e2e/*.spec.ts`). ESLint and Prettier ignore `playwright-report/` and `test-results/`.
+5. Versions as pinned in plan §2: `@playwright/test` 1.64.1 (latest; 1.x is the only major) and `@axe-core/playwright` 4.14.0 (latest, matches `axe-core`), both re-checked on npm (not deprecated).
+
+**Learned**
+- **One-time machine setup:** Playwright's Chromium needs system libraries that minimal WSL Ubuntu lacks (first missing: `libnspr4.so`). Install with `sudo env "PATH=$PATH" npx playwright install-deps chromium` in `frontend/` (`env PATH` because `sudo` resets `PATH` and Node comes from nvm), after `npx playwright install chromium`. For T16's README.
+- The first try failed on the apt lock: Ubuntu's `apt.systemd.daily` update had hung for over a day. `sudo systemctl stop apt-daily.service` cleared it.
+- The checks were tried against a broken page once: a 500 px element at 360 px fails the scroll check (156 px too wide), and `#eee` text fails axe's `color-contrast`. A first attempt "passed" because it changed the page before React had rendered; checks must wait for the page (e.g. the Sign in button) first.
+- With the backend unreachable, the run stops in global setup with "…/actuator/health is not reachable. Start the backend: …".
+- Coverage unchanged: 86.5% lines, 79.2% branches (e2e code isn't measured by Vitest).
+
 ## 2026-10-22 · T11 done: sign-in and home page (T12 next)
 
 **Decided**

@@ -40,6 +40,8 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       environment: "jsdom",
+      // Unit and component tests only; e2e/*.spec.ts belong to Playwright.
+      include: ["src/**/*.test.{ts,tsx}"],
       setupFiles: ["./src/test/setup.ts"],
       coverage: {
         provider: "v8",
