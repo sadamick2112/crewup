@@ -22,7 +22,7 @@ Decisions and context from planning sessions, so any new Claude Code session can
 - Each TanStack Query retry is a new request with a fresh `traceparent`, so the reference shown is the last attempt's (the bottom `me` row in DevTools → Network). Default retries (3) delay the error message a few seconds; left at the default.
 - Coverage: 86.5% lines, 79.2% branches. Uncovered: `oidcConfig.ts`, `AuthCallbackPage`, `ErrorMessage`'s no-trace-ID branch, and T10's `useApiClient()` guard.
 - Checked by hand with the stack running: sign in, greeting, reload stays signed in (three `/api/me` 200s in the backend log, each with its own browser trace ID), sign out; and with the backend stopped, the error with a reference matching the console.
-- `m0-frontend-done` (planned after T11) is created only when asked.
+- **Tag `m0-sign-in-works` → `0cf42bb`** (replaces the planned `m0-frontend-done`: the UI keeps growing every milestone, so "frontend done" would mislead; the tag names the first full journey, sign in and greeting). Tags name what works at that point, not a layer being finished.
 
 ## 2026-10-22 · T10 done: generated API client and useMe (T11 next)
 
@@ -88,7 +88,7 @@ Decisions and context from planning sessions, so any new Claude Code session can
 **Decided**
 1. **Milestone tags keep snapshots to look back on** (this is also a learning project: how an app grows step by step with Claude Code). Annotated tags, never moved or reused: `git tag -a <name> <commit> -m "<what it marks>"`, pushed separately with `git push origin <name>`.
    - `m0-backend-done` → `521f895`: backend skeleton (T1–T8).
-   - Planned: `m0-frontend-done` after T11, `m0-done` on the merge to `main`, then one per milestone (or notable stage) from M1.
+   - Planned: `m0-frontend-done` after T11 (created as `m0-sign-in-works`, see the T11 entry), `m0-done` on the merge to `main`, then one per milestone (or notable stage) from M1.
    - Browse with `git checkout <tag>` (detached HEAD; `git switch -` to return) or under *Tags* on GitHub. Commit history and this log fill in the steps between tags.
 2. **No CI until T13, by plan order.** GitHub Actions is enabled on the repo, but no workflow exists yet; the developer chose not to pull a backend job forward.
 
