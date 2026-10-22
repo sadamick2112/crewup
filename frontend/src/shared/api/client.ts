@@ -1,5 +1,6 @@
-import type { Client } from "openapi-fetch";
+import createClient, { type Client } from "openapi-fetch";
 import type { paths } from "./schema";
+import { newTraceparent } from "./traceparent";
 
 /** The typed CrewUp API client, generated from api/openapi.json (M0-9). */
 export type ApiClient = Client<paths>;
@@ -24,7 +25,28 @@ export class ApiError extends Error {
 export function createApiClient(
   getAccessToken: AccessTokenProvider,
 ): ApiClient {
-  // eslint-disable-next-line @typescript-eslint/no-meaningless-void-operator -- red-commit stub (TEST-2): marks the parameter used
-  void getAccessToken;
-  throw new Error("not implemented");
+  // A fetch wrapper rather than openapi-fetch middleware: the trace ID stays a local variable from sending the
+  // request to reading its response, instead of being parsed back out of the request headers.
+  async function fetchWithTraceAndToken(request: Request): Promise<Response> {
+    const { header, traceId } = newTraceparent();
+    request.headers.set("traceparent", header);
+    const accessToken = await getAccessToken();
+    if (accessToken !== undefined) {
+      request.headers.set("Authorization", `Bearer ${accessToken}`);
+    }
+
+    const response = await fetch(request);
+    // Use the trace ID we sent, not one from the body: an error from the dev proxy (backend down) has no body.
+    if (!response.ok) {
+      throw new ApiError(response.status, traceId);
+    }
+    return response;
+  }
+
+  return createClient<paths>({
+    // The API shares the page's origin (the Vite proxy in development, plan §5). Spelled out because fetch
+    // outside a browser (Node, in tests) can't resolve a relative URL.
+    baseUrl: window.location.origin,
+    fetch: fetchWithTraceAndToken,
+  });
 }

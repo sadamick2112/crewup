@@ -4,6 +4,22 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-22 · T10 done: generated API client and useMe (T11 next)
+
+**Decided**
+1. **How the token and signed-in state reach the API code** (chosen from three options with previews): `createApiClient(getAccessToken)` builds the client once and asks for the token on every request, so a silently renewed token is used right away. `ApiClientContext` (`src/shared/api/apiClientContext.ts`) hands the client to hooks. `useMe(isSignedIn)` takes the signed-in state as an argument. T10 has no OIDC code; T11 wires `getAccessToken` to `userManager.getUser()` and passes `auth.isAuthenticated`. Rejected: `useMe()` calling `useAuth()` itself (pulls `react-oidc-context` into T10), and a module-level client with a token setter (global state that every test resets).
+2. **`ApiError` carries the trace ID the browser sent**, not the one in the response body. Both match for backend errors, but an error from the Vite proxy (backend down) has no body (tested: 502 with no body). `ApiError` has `status` and `traceId` only (GEN-10).
+3. **A fetch wrapper instead of openapi-fetch middleware** (plan §6 says middleware). With middleware, `onResponse` would have to parse the trace ID back out of the request headers. In the wrapper it stays a local variable. Same behavior, one function.
+4. **Extra tests beyond the task list:** `M0_9_clientSendsNoAuthorizationWhenSignedOut`, `M0_28_traceparentIdsAreNeverAllZeros` (plan §6's "never all zeros"), and `M0_28_failedRequestWithoutProblemDetailsStillCarriesTraceId`.
+
+**Learned**
+- openapi-fetch passes on errors thrown from `fetch` (and from `onResponse`) to the caller, so `client.GET` rejects with the `ApiError`. TanStack Query then exposes it as the query's `error`.
+- The client sets `baseUrl: window.location.origin`: Node's `Request` (used in tests) rejects relative URLs, while browsers resolve them.
+- `erasableSyntaxOnly` rules out constructor parameter properties (`constructor(readonly status: number)`), so `ApiError` declares its fields.
+- Prettier wraps at 80 columns (its default) even though comments are written to 120; let `npm run format` decide.
+- Coverage: 96.8% lines, 83.3% branches. The only uncovered line is `useApiClient()`'s "no context provided" guard (a wiring mistake, not spec behavior), left untested on purpose.
+- `useMe`'s query function casts `data` to `UserProfile`: openapi-fetch types it as possibly undefined (the error branch), but the wrapper throws before that branch can happen.
+
 ## 2026-10-19 · T9 done: frontend scaffold and a version rule (T10 next)
 
 **Decided**

@@ -100,12 +100,12 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 
 ### T10 · Generated API client 🔴→🟢 [plan §6]
 **Red**
-- [ ] `gen:api` script and the generated `schema.d.ts` (generation is setup, so it goes in this commit).
-- [ ] Tests, with an MSW handler for `GET /api/me`: `useMe` returns the profile; the client sends `Authorization: Bearer <token>`; `useMe` stays idle when signed out; `M0_28_traceparentHasValidFormatAndIsUnique`; `M0_28_apiRequestsCarryTraceparent`; a failed request throws an `ApiError` carrying the `traceId`. Stubs: `client.ts`, `traceparent.ts` and `useMe()` that throw.
-- [ ] Run: all fail on assertions. **Commit:** `test(frontend): add failing tests for API client, traceparent and useMe [M0-9, M0-28]`
+- [x] `gen:api` script and the generated `schema.d.ts` (generation is setup, so it goes in this commit).
+- [x] Tests, with an MSW handler for `GET /api/me`: `useMe` returns the profile; the client sends `Authorization: Bearer <token>`; `useMe` stays idle when signed out; `M0_28_traceparentHasValidFormatAndIsUnique`; `M0_28_apiRequestsCarryTraceparent`; a failed request throws an `ApiError` carrying the `traceId`. Stubs: `client.ts`, `traceparent.ts` and `useMe()` that throw.
+- [x] Run: all fail on assertions. **Commit:** `test(frontend): add failing tests for API client, traceparent and useMe [M0-9, M0-28]`
 
 **Green**
-- [ ] `src/shared/api/traceparent.ts`, `src/shared/api/client.ts` (`openapi-fetch` plus bearer-token and `traceparent` middleware, `ApiError`), and `src/core/me/` with `meKeys` and `useMe()`.
+- [x] `src/shared/api/traceparent.ts`, `src/shared/api/client.ts` (`openapi-fetch` plus bearer-token and `traceparent` middleware, `ApiError`), and `src/core/me/` with `meKeys` and `useMe()`.
 
 **Done when:** tests pass without changes, and `npm run gen:api` leaves no diff. **Commit:** `feat(frontend): add generated API client with trace correlation and useMe query [M0-9, M0-28]`
 
