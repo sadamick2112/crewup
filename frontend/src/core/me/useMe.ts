@@ -23,3 +23,5 @@ export function useMe(isSignedIn: boolean): UseQueryResult<UserProfile> {
     enabled: isSignedIn,
   });
 }
+
+console.log("deliberate lint error for T13");

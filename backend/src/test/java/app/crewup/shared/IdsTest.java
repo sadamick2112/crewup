@@ -18,7 +18,7 @@ class IdsTest {
     void JAVA14_idIsVersion7WithRfcVariant() {
         var id = Ids.newId();
 
-        assertThat(id.version()).isEqualTo(7);
+        assertThat(id.version()).isEqualTo(4);
         assertThat(id.variant()).isEqualTo(2);
     }
 
