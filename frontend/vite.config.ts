@@ -43,6 +43,8 @@ export default defineConfig(({ mode }) => {
           "src/test/**",
           // shadcn/ui components are copied in from the registry, not written here (M0-24).
           "src/components/ui/**",
+          // Generated from api/openapi.json by `npm run gen:api` (M0-24).
+          "src/shared/api/schema.d.ts",
           // Bootstrap entry point: mounts the app into index.html (M0-24).
           "src/main.tsx",
         ],
