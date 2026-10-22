@@ -16,7 +16,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* "@/..." imports resolve to src/ (also set in vite.config.ts and tsconfig.json for the shadcn CLI) */
+    /* "@/..." imports resolve to src/. Vite reads this (resolve.tsconfigPaths); tsconfig.json repeats it for the shadcn CLI. */
     "paths": {
       "@/*": ["./src/*"]
     },
