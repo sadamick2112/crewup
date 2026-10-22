@@ -111,12 +111,12 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 
 ### T11 · Sign-in and home page 🔴→🟢 [plan §6]
 **Red**
-- [ ] Tests (auth state supplied by a test wrapper, API by MSW): `M0_7_showsGreetingWhenSignedIn`, `M0_7_showsSignInWhenSignedOut`, `M0_7_signInButtonStartsSignIn`, `M0_7_signOutButtonSignsOut`, `M0_25_homeSignedOutHasNoAxeViolations`, `M0_25_homeSignedInHasNoAxeViolations`; for `restoreSession` with a fake `UserManager`: `M0_7_restoreSessionReturnsUserWhenSsoSessionExists`, `M0_7_restoreSessionTreatsLoginRequiredAsSignedOut`, `M0_7_restoreSessionTreatsOtherErrorsAsSignedOut`; `M0_28_failedRequestShowsReferenceId` (MSW returns 500; the page shows "Reference: {traceId}" and `console.error` gets the same ID). Stubs: an empty `HomePage`, an empty `ErrorMessage`, and a `restoreSession` that throws.
-- [ ] Run: all fail on assertions. **Commit:** `test(frontend): add failing tests for home page sign-in states [M0-7, M0-25]`
+- [x] Tests (auth state supplied by a test wrapper, API by MSW): `M0_7_showsGreetingWhenSignedIn`, `M0_7_showsSignInWhenSignedOut`, `M0_7_signInButtonStartsSignIn`, `M0_7_signOutButtonSignsOut`, `M0_25_homeSignedOutHasNoAxeViolations`, `M0_25_homeSignedInHasNoAxeViolations`; for `restoreSession` with a fake `UserManager`: `M0_7_restoreSessionReturnsUserWhenSsoSessionExists`, `M0_7_restoreSessionTreatsLoginRequiredAsSignedOut`, `M0_7_restoreSessionTreatsOtherErrorsAsSignedOut`; `M0_28_failedRequestShowsReferenceId` (MSW returns 500; the page shows "Reference: {traceId}" and `console.error` gets the same ID). Stubs: an empty `HomePage`, an empty `ErrorMessage`, and a `restoreSession` that throws.
+- [x] Run: all fail on assertions. **Commit:** `test(frontend): add failing tests for home page sign-in states [M0-7, M0-25]`
 
 **Green**
-- [ ] `restoreSession()` (the tested decisions). `oidcConfig.ts` as a plain settings object, and `react-oidc-context` wiring: in-memory user store, PKCE code flow, `/auth/callback` route, `restoreSession` at startup, automatic silent renew, sign-out redirect (configuration, exempt from test-first; keep logic out of it, plan §6).
-- [ ] Home page: signed out, sign-in Button; signed in, "Hello, {displayName}" Card and sign-out; if `/api/me` fails, `ErrorMessage` with the reference ID. Mobile-first (styling is exempt; behavior is covered by the red tests).
+- [x] `restoreSession()` (the tested decisions). `oidcConfig.ts` as a plain settings object, and `react-oidc-context` wiring: in-memory user store, PKCE code flow, `/auth/callback` route, `restoreSession` at startup, automatic silent renew, sign-out redirect (configuration, exempt from test-first; keep logic out of it, plan §6).
+- [x] Home page: signed out, sign-in Button; signed in, "Hello, {displayName}" Card and sign-out; if `/api/me` fails, `ErrorMessage` with the reference ID. Mobile-first (styling is exempt; behavior is covered by the red tests).
 
 **Done when:** tests pass without changes, and the full flow works by hand with the stack running (sign in, greeting, reload stays signed in, sign out). **Commit:** `feat(frontend): sign in with OIDC + PKCE and greet the user [M0-5, M0-7, M0-11, M0-25, M0-28, ACC-1]`
 

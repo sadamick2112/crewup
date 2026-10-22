@@ -9,15 +9,22 @@ const repoRoot = path.resolve(import.meta.dirname, "..");
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // Reads only this variable (not the whole .env) and never exposes it to browser code.
-  const { CREWUP_BACKEND_PORT: backendPort = "8080" } = loadEnv(
-    mode,
-    repoRoot,
+  // Reads only these variables, not the whole .env. Only the issuer reaches browser code (it's public).
+  const {
+    CREWUP_BACKEND_PORT: backendPort = "8080",
+    CREWUP_OIDC_ISSUER_URI:
+      oidcAuthority = "http://localhost:8180/realms/crewup",
+  } = loadEnv(mode, repoRoot, [
     "CREWUP_BACKEND_PORT",
-  );
+    "CREWUP_OIDC_ISSUER_URI",
+  ]);
 
   return {
     plugins: [react(), tailwindcss()],
+    define: {
+      // The browser signs in with the same realm whose tokens the backend accepts.
+      "import.meta.env.VITE_OIDC_AUTHORITY": JSON.stringify(oidcAuthority),
+    },
     resolve: {
       // "@/..." imports, defined once in tsconfig.app.json.
       tsconfigPaths: true,

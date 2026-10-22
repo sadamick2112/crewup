@@ -4,6 +4,26 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-22 · T11 done: sign-in and home page (T12 next)
+
+**Decided**
+1. **HomePage reads sign-in state with react-oidc-context's `useAuth()`** (chosen from three options with previews). Tests supply the library's `AuthContext` with a fake value (`isAuthenticated`, `signinRedirect`/`signoutRedirect` as `vi.fn()`, one cast in the helper). Rejected: props plus a thin container (untested glue), and a project-owned `Session` interface with an adapter (an extra layer).
+2. **`restoreSession(userManager)` returns the user or null.** `login_required` (no SSO session, the normal case) is silent; any other silent-sign-in error also means signed out, but calls `console.warn` so a misconfiguration isn't invisible.
+3. **`restoreSession` runs before the first render** (top-level `await` in `main.tsx`), skipped when the URL has sign-in parameters (`hasAuthParams()`): that's Keycloak answering, either the redirect back or the silent-sign-in iframe, and `AuthProvider` handles it. So a reload never flashes "Sign in" before the greeting. The routes and providers live in `main.tsx` (the excluded bootstrap file, as plan §6 says).
+4. **One callback page for both flows:** `redirect_uri` and `silent_redirect_uri` are both `/auth/callback`. `signinCallback()` reads the request type from the stored state and handles a redirect or the iframe. `AuthCallbackPage` waits for `isLoading` to end, then navigates to `/` (a failed sign-in lands on "Sign in").
+5. **The OIDC authority comes from `CREWUP_OIDC_ISSUER_URI`** in the repo root `.env` (the backend's issuer), exposed by `vite.config.ts` as `import.meta.env.VITE_OIDC_AUTHORITY` and typed in `src/vite-env.d.ts`. One value for both sides, like the backend port in T9.
+6. **`ErrorMessage` uses shadcn's `Alert`** (TS-8; `role="alert"`, added with `shadcn add alert`, `package.json` unchanged). It shows the reference only for an `ApiError`; a network `TypeError` (dev server down) shows the message without one.
+
+**Learned**
+- Keycloak answers `prompt=none` without an SSO session with a 302 to the callback carrying `error=login_required`, and no frame-blocking header, so the silent iframe works (checked with curl, then in the browser).
+- `signinSilent()` uses the refresh token when the stored user has one, so renewals after startup don't need the iframe; only the first silent sign-in after a reload does.
+- Vite's `define` for an `import.meta.env.*` key shows up in dev in the injected `import.meta.env` object, and in the build as a literal (the minifier writes it with backticks, so grep for the URL, not `"…"`).
+- `spring-boot:run` runs two JVMs: Maven's, and the forked app. `kill <app pid>` stops it gracefully; Maven then reports "exit code: 143" (128 + SIGTERM) as an `[ERROR]`, which is expected.
+- Each TanStack Query retry is a new request with a fresh `traceparent`, so the reference shown is the last attempt's (the bottom `me` row in DevTools → Network). Default retries (3) delay the error message a few seconds; left at the default.
+- Coverage: 86.5% lines, 79.2% branches. Uncovered: `oidcConfig.ts`, `AuthCallbackPage`, `ErrorMessage`'s no-trace-ID branch, and T10's `useApiClient()` guard.
+- Checked by hand with the stack running: sign in, greeting, reload stays signed in (three `/api/me` 200s in the backend log, each with its own browser trace ID), sign out; and with the backend stopped, the error with a reference matching the console.
+- `m0-frontend-done` (planned after T11) is created only when asked.
+
 ## 2026-10-22 · T10 done: generated API client and useMe (T11 next)
 
 **Decided**
