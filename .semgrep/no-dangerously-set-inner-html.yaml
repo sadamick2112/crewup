@@ -1,0 +1,18 @@
+rules:
+  - id: no-dangerously-set-inner-html
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      dangerouslySetInnerHTML renders raw HTML and opens the page to XSS. Render text or React elements
+      instead (TS-10).
+    metadata:
+      category: security
+      cwe: "CWE-79: Cross-site Scripting"
+      standard: TS-10
+      requirement: M0-16
+    patterns:
+      - pattern-either:
+          - pattern: <$EL dangerouslySetInnerHTML={$HTML} />
+          - pattern: '{..., dangerouslySetInnerHTML: $HTML, ...}'
+      # Report the attribute's line, not the start of the enclosing JSX expression.
+      - focus-metavariable: $HTML

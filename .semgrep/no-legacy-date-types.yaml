@@ -1,0 +1,19 @@
+rules:
+  - id: no-legacy-date-types
+    languages: [java]
+    severity: ERROR
+    message: >-
+      Legacy date type. Use java.time instead: Instant for moments, ZonedDateTime with a ZoneId for local
+      times (JAVA-9).
+    metadata:
+      category: best-practice
+      standard: JAVA-9
+      requirement: M0-16
+    # Imports catch normal use. The regex catches fully qualified use (`new java.util.Date()`); its `(?!;)`
+    # skips import lines, which the import patterns already report. It also matches comments: rewrite them.
+    pattern-either:
+      - pattern: import java.util.Date;
+      - pattern: import java.util.Calendar;
+      - pattern: import java.util.GregorianCalendar;
+      - pattern: import java.sql.Timestamp;
+      - pattern-regex: \bjava\.(util\.(Date|Calendar|GregorianCalendar)|sql\.Timestamp)\b(?!;)

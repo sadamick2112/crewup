@@ -1,0 +1,51 @@
+# Local development services (M0-1). Copy .env.example to .env first.
+# Everything here is for local development only: credentials are dev-only and
+# Keycloak runs in dev mode.
+name: crewup
+
+services:
+  postgres:
+    image: postgres:18.6
+    environment:
+      POSTGRES_DB: ${CREWUP_DB_NAME}
+      POSTGRES_USER: ${CREWUP_DB_USER}
+      POSTGRES_PASSWORD: ${CREWUP_DB_PASSWORD}
+    ports:
+      - "${CREWUP_DB_PORT:-5432}:5432"
+    volumes:
+      # Postgres 18 images keep data under /var/lib/postgresql/<major>/, so mount the parent.
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.1
+    # Dev mode with the committed realm. No data volume on purpose: after
+    # `docker compose down`, the realm is re-imported fresh from infra/keycloak/.
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:8080"
+    volumes:
+      - ./infra/keycloak:/opt/keycloak/data/import:ro
+    healthcheck:
+      # The image has no curl, so ask the management port's readiness endpoint with bash.
+      test:
+        - CMD-SHELL
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/9000 &&
+          printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 &&
+          head -1 <&3 | grep -q ' 200 '
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+volumes:
+  postgres-data:

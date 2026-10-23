@@ -1,0 +1,30 @@
+rules:
+  - id: sql-string-concat
+    languages: [java]
+    severity: ERROR
+    message: >-
+      SQL or JPQL is built by concatenation or formatting. Use bound parameters instead: Spring Data method
+      names, @Query with :named parameters, or the Criteria API (JAVA-13).
+    metadata:
+      category: security
+      cwe: "CWE-89: SQL Injection"
+      standard: JAVA-13
+      requirement: M0-16
+    mode: taint
+    pattern-sources:
+      - patterns:
+          - pattern-either:
+              - pattern: '"..." + $X'
+              - pattern: '$X + "..."'
+              - pattern: String.format(...)
+              - pattern: '"...".formatted(...)'
+          - pattern-not: '"..." + "..."'
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $EM.createQuery($SQL, ...)
+              - pattern: $EM.createNativeQuery($SQL, ...)
+              - pattern: (org.springframework.jdbc.core.JdbcTemplate $J).$METHOD($SQL, ...)
+              - pattern: (org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate $J).$METHOD($SQL, ...)
+              - pattern: (org.springframework.jdbc.core.simple.JdbcClient $J).sql($SQL)
+          - focus-metavariable: $SQL
