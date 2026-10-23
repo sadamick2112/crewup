@@ -1,6 +1,8 @@
 # Dependabot version updates (M0-18, plan §7). Security updates and alerts are repository settings (T17).
 # Weekly, with minor and patch updates grouped into one PR per ecosystem; each major update gets its own PR, so it
-# is reviewed against the version rule in plan §2. Not covered: the scanner images in security.yml (bump by hand).
+# is reviewed against the version rule in plan §2. A release is proposed only once it is 7 days old (cooldown), so a
+# hijacked or broken release has time to be pulled first. Not covered: the scanner images in security.yml (bump by
+# hand).
 version: 2
 
 updates:
@@ -8,6 +10,8 @@ updates:
     directory: /backend
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       minor-and-patch:
         update-types: [minor, patch]
@@ -16,6 +20,8 @@ updates:
     directory: /frontend
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       minor-and-patch:
         update-types: [minor, patch]
@@ -34,6 +40,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       minor-and-patch:
         update-types: [minor, patch]
@@ -43,6 +51,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       minor-and-patch:
         update-types: [minor, patch]
