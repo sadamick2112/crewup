@@ -146,11 +146,11 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 **Done when:** `semgrep --test .semgrep` passes locally (Docker), and the workflow is green on GitHub. **Commit:** `ci(security): add Semgrep rules and gitleaks scanning [M0-15, M0-16, M0-17, M0-19]`
 
 ### T15 · CodeQL and Dependabot [plan §7]
-- [ ] `.github/workflows/codeql.yml` (java-kotlin, javascript-typescript, `security-extended`).
-- [ ] `.github/dependabot.yml` (maven, npm, github-actions, docker-compose; weekly, grouped).
-- [ ] Triage CodeQL findings; dismissals carry a reason (M0-19).
+- [x] `.github/workflows/codeql.yml` (java-kotlin, javascript-typescript, `security-extended`).
+- [x] `.github/dependabot.yml` (maven, npm, github-actions, docker-compose; weekly, grouped).
+- [x] Triage CodeQL findings; dismissals carry a reason (M0-19).
 
-**Done when:** CodeQL results show in the Security tab, and Dependabot config is accepted (Insights → Dependency graph → Dependabot). **Commit:** `ci(security): add CodeQL analysis and Dependabot [M0-15, M0-18]`
+**Done when:** CodeQL results show in the Security tab, and Dependabot config is accepted (Insights → Dependency graph → Dependabot). *(The Dependabot check needs the file on `main`, so it moved to T17.)* **Commit:** `ci(security): add CodeQL analysis and Dependabot [M0-15, M0-18]`
 
 ### T16 · Documentation [spec §4]
 - [ ] README: what CrewUp is, prerequisites, run locally (`cp .env.example .env` …), dev user (DEV ONLY), the security scans CI runs, and how to run Semgrep locally.
@@ -164,5 +164,6 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 - [ ] On GitHub: enable Dependabot alerts and security updates; set the code scanning thresholds; protect `main` (require a PR and the checks `backend`, `frontend`, `api-client`, `semgrep`, `gitleaks`, `CodeQL`). *(Done by you in the GitHub UI; I'll give step-by-step instructions.)*
 - [ ] Run `/review-standards`, then fix or justify the findings.
 - [ ] Open the PR to `main` using the template, and run the plan's Verification steps.
+- [ ] After the merge: Insights → Dependency graph → Dependabot lists the four ecosystems with no config error, and the first update runs start. *(Moved from T15: Dependabot reads its config from the default branch.)*
 
 **Done when:** the PR is green and merged, and M0 is marked done in `roadmap.md` / `requirements.md`.

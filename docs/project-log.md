@@ -4,6 +4,23 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-23 · T15 done: CodeQL and Dependabot (T16 next)
+
+**Decided**
+1. **CodeQL skips `.semgrep/`** (`paths-ignore` in the `init` step's inline config, with the reason in a comment): the rule fixtures are insecure on purpose.
+2. **The CSRF alert is dismissed, not suppressed in code.** CodeQL (`java/spring-disabled-csrf-protection`, high, `SecurityConfig.java:26`) has no inline suppression comment, so alert #5 is dismissed as "won't fix" with the ADR-004 reason (M0-19). Unlike Semgrep's registry rule, CodeQL does match the lambda form `csrf -> csrf.disable()`.
+3. **Dependabot ignores major TypeScript and ESLint updates**, the two plan §2 holds with a technical blocker (a comment on each says when to remove it). Vitest, MSW and React Router are held only because adoption is low, so their major PRs still arrive for a re-check.
+4. **A 7-day `cooldown` on every ecosystem**, after Semgrep's `dependabot-missing-cooldown` warning on the first scan of `dependabot.yml` (4 warnings, one per ecosystem). Fixed rather than suppressed: a new release waits a week, so a hijacked one has time to be pulled. GitHub's docs say `default-days` works for all four ecosystems, and GitHub applies 3 days when nothing is set.
+5. **`github/codeql-action` v4.39.1**, the same commit `security.yml` pins. Its `releases/latest` is a CodeQL *bundle* release (`codeql-bundle-v2.27.3`), so list the `v4.*` tags to find the action's own latest version.
+
+**Learned**
+- First run on PR #1: java-kotlin 1 min 50 s, javascript-typescript 1 min, both green; 120 and 103 rules; one alert (the CSRF one above). Code scanning's default setup is "not configured", so the workflow doesn't conflict with it.
+- `paths-ignore` with Java `build-mode: none`: the log doesn't list the extracted files, but the CLI announces `informsAboutUnsupportedPathFilters` and printed no such warning, and no alert points into `.semgrep/`. Strong, but indirect, evidence that the exclusion holds.
+- **Dependabot reads `dependabot.yml` from the default branch only**, so pushing it to the feature branch started no update runs. The "config accepted" check moved to T17, after the merge. (The docs don't say this outright; the behavior here matches it.)
+- Semgrep's registry packs also scan YAML such as `dependabot.yml`; warnings reach code scanning without failing the gate.
+- Dependabot alerts are still off (the API answers 404); T17 turns them on.
+- `jq` isn't installed locally (CI has it); use `python3 -c 'import json…'` for local JSON checks.
+
 ## 2026-10-23 · T14 done: Semgrep and gitleaks (T15 next)
 
 **Decided**
