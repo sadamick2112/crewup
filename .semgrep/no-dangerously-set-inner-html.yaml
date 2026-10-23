@@ -1,0 +1,6 @@
+rules:
+  - id: no-dangerously-set-inner-html
+    languages: [typescript]
+    severity: ERROR
+    message: Red-commit stub (T14); the green commit writes the real pattern.
+    pattern: red_stub_matches_nothing()
