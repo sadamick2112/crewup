@@ -4,6 +4,31 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-23 · T14 done: Semgrep and gitleaks (T15 next)
+
+**Decided**
+1. **Fixtures were tried against real patterns in a scratch folder before the red commit**, so no committed fixture would turn out impossible to satisfy (TEST-11 forbids changing it later). The red commit then had stub rules; 0/6 passed, with every `ruleid` line missed.
+2. **`r/java.spring` replaces plan §7's `p/spring`**, which doesn't exist (registry 404). `r/java.spring` is Semgrep's Spring rule folder (15 rules, including `spring-csrf-disabled`).
+3. **Test code is scanned.** Semgrep's built-in ignore list skips `test/` and `tests/`. A root `.semgrepignore` replaces that list, so it repeats the other defaults and adds `.semgrep/` (the fixtures), keeping "never `UUID.randomUUID()`, even in tests" (T4–T6 entry) enforceable.
+4. **One scan, gated on its JSON.** The scan writes SARIF (every severity, uploaded to code scanning) and JSON. `jq` counts `ERROR` findings in the JSON and fails the job if any exist. The JSON leaves out `nosemgrep`-suppressed findings, and puts the severity on each finding (SARIF only has it on the rule). Rejected: a second `--severity ERROR --error` pass (plan §7's wording). The scan is cheap (about 4 s locally, 44 s for the CI job), but one pass is simpler.
+5. **No `Ids.java` exclusion** in `no-random-uuid-for-entity-ids`: `Ids` builds UUIDs from `SecureRandom` and never calls `randomUUID()`.
+6. **No `.gitleaks.toml`:** the dev-only realm and `.env.example` values aren't flagged.
+7. **Images pinned by tag and digest** in `security.yml`'s `env`: `semgrep/semgrep:1.182.0` (latest; 1.x is the only major, released weekly) and `ghcr.io/gitleaks/gitleaks:v8.30.1` (latest of 8.x). `github/codeql-action/upload-sarif` is pinned at v4.39.1 (an annotated tag, dereferenced to its commit).
+
+**Learned**
+- **`semgrep --test` finds no tests under a path with a hidden segment** (`.semgrep`, `./.semgrep/`, `/src/.semgrep` all report "No unit tests found"). Mounting the folder as `/rules` works; `semgrep scan --config .semgrep` is not affected.
+- `ruleid:` annotations must be `//` comments on the line above the finding. A JSX comment (`{/* ruleid: … */}`) isn't recognized, and a JSX finding is reported where its enclosing expression starts, so `no-dangerously-set-inner-html` uses `focus-metavariable` to report the attribute's line.
+- A `metavariable-regex` on a metavariable that an alternative never binds silently rejects that alternative. `slf4j-no-concat` keeps the classic and fluent forms as separate `patterns` blocks for this reason.
+- `sql-string-concat` uses taint mode so a query built in a variable and passed on later is caught.
+- Project rules are reported as `semgrep.<rule-id>`; `nosemgrep: <rule-id>` with the bare ID still suppresses.
+- **The CSRF `nosemgrep` in `SecurityConfig` suppresses nothing today:** the registry rule matches `.csrf().disable()`, not the lambda `csrf -> csrf.disable()`. Kept, as plan §5 asks, with its ADR-004 reason.
+- The flag to show suppressed findings is `--disable-nosem` (not `--disable-nosemgrep`). With it, still 0 findings.
+- Both images trust their mount point for git (`safe.directory`: `/src` for Semgrep, `*` for gitleaks), so mount the repo at `/src` for Semgrep. Semgrep scans only files git tracks.
+- **Dependabot (T15) won't update the image lines in `security.yml`**; bump them by hand.
+- Failure checks: a temporary `UUID.randomUUID()` in `IdsTest` made the gate count 1 (a second one under `nosemgrep` was left out); a fake GitHub token committed in a scratch clone failed gitleaks (`github-pat`, exit 1, redacted).
+- First run on PR #1: `semgrep` (44 s: 6/6 rule tests, 326 rules on 115 files, 0 findings) and `gitleaks` (9 s, 41 commits, no leaks) green; code scanning shows a "Semgrep OSS" analysis.
+- **Local commands** are in plan §7. T16 puts them in the README and `coding-standards.md`, and fixes `/review-standards`, which runs Semgrep only "if installed" (added to T16's checklist).
+
 ## 2026-10-22 · T13 done: CI workflow (T14 next)
 
 **Decided**

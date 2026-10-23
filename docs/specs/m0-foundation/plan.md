@@ -168,7 +168,10 @@ Pinned in T1 on **October 14, 2026**, from start.spring.io, `repo1.maven.org` me
   - **gitleaks** (`ghcr.io/gitleaks/gitleaks:v8.30.1`, pinned by digest): a pull request scans its commits (`base..head`); a push to `main` scans the full history. Output is redacted. A `.gitleaks.toml` allowlist is used only for the documented dev-only realm values, each with a reason. *(T14: the dev-only values aren't flagged, so there is no `.gitleaks.toml`.)*
 - **`.github/workflows/codeql.yml`:** a matrix over `java-kotlin` (build mode `none`) and `javascript-typescript`, with the `security-extended` query suite. The failure threshold ("High or higher") is a repository setting, listed in §9.
 - **`.semgrep/` rules,** each with a fixture file (`// ruleid:` / `// ok:` annotations): `sql-string-concat` (JAVA-13), `no-dangerously-set-inner-html` (TS-10), `no-field-injection` (JAVA-3), `no-legacy-date-types` (JAVA-9), `slf4j-no-concat` (JAVA-12), `no-random-uuid-for-entity-ids` (JAVA-14; no `Ids.java` exclusion after all, because `Ids` builds UUIDs from `SecureRandom` and never calls `UUID.randomUUID()`).
-- **Running locally:** `docker run --rm -v "$PWD:/src" semgrep/semgrep semgrep --config .semgrep` (README and `coding-standards.md` updated to match). This avoids a Python install.
+- **Running locally** (from the repo root; README and `coding-standards.md` updated to match in T16). Docker avoids a Python install:
+  - Scan with the project rules: `docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.182.0 semgrep scan --metrics=off --config .semgrep` (add the registry `--config`s from CI for the full scan).
+  - Test the rules: `docker run --rm -v "$PWD/.semgrep:/rules:ro" semgrep/semgrep:1.182.0 semgrep --test --metrics=off /rules`.
+  - Secrets: `docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --verbose` (add `--log-opts="origin/main..HEAD"` for the branch only, or `--staged` before a commit).
 - **`.github/dependabot.yml`:** weekly updates for `maven` (`/backend`), `npm` (`/frontend`), `github-actions` (`/`), and `docker-compose` (`/`), with minor and patch updates grouped.
 - **Supply chain:** third-party GitHub Actions are pinned by commit SHA with a version comment, and Dependabot keeps them current.
 

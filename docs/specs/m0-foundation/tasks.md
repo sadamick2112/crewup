@@ -135,13 +135,13 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 
 ### T14 · Semgrep and gitleaks 🔴→🟢 [plan §7]
 **Red**
-- [ ] `.semgrep/` fixtures (`// ruleid:` and `// ok:` examples) for `sql-string-concat`, `no-dangerously-set-inner-html`, `no-field-injection`, `no-legacy-date-types`, `slf4j-no-concat`, `no-random-uuid-for-entity-ids`, with rule files that match nothing yet.
-- [ ] Run `semgrep --test .semgrep`: every fixture fails. **Commit:** `test(security): add failing Semgrep rule fixtures [M0-16]`
+- [x] `.semgrep/` fixtures (`// ruleid:` and `// ok:` examples) for `sql-string-concat`, `no-dangerously-set-inner-html`, `no-field-injection`, `no-legacy-date-types`, `slf4j-no-concat`, `no-random-uuid-for-entity-ids`, with rule files that match nothing yet.
+- [x] Run `semgrep --test .semgrep`: every fixture fails. **Commit:** `test(security): add failing Semgrep rule fixtures [M0-16]`
 
 **Green**
-- [ ] Write the rule patterns until `semgrep --test` passes without fixture changes.
-- [ ] `.github/workflows/security.yml`: a Semgrep scan with SARIF upload and error gate, `semgrep --test`, and gitleaks; `.gitleaks.toml` only if needed, with reasons.
-- [ ] Resolve or justify every finding on the existing code (M0-19).
+- [x] Write the rule patterns until `semgrep --test` passes without fixture changes.
+- [x] `.github/workflows/security.yml`: a Semgrep scan with SARIF upload and error gate, `semgrep --test`, and gitleaks; `.gitleaks.toml` only if needed, with reasons.
+- [x] Resolve or justify every finding on the existing code (M0-19).
 
 **Done when:** `semgrep --test .semgrep` passes locally (Docker), and the workflow is green on GitHub. **Commit:** `ci(security): add Semgrep rules and gitleaks scanning [M0-15, M0-16, M0-17, M0-19]`
 
@@ -156,6 +156,7 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 - [ ] README: what CrewUp is, prerequisites, run locally (`cp .env.example .env` …), dev user (DEV ONLY), the security scans CI runs, and how to run Semgrep locally.
 - [ ] `docs/adr/004-oidc-provider.md`: Keycloak for development, SPA + PKCE with in-memory tokens, CSRF off for the stateless API, and the same-site requirement for silent sign-in in M8.
 - [ ] CLAUDE.md commands (npm in `frontend/`, `openapi.update`), `coding-standards.md` DB-1 (timestamp versions) and the local Semgrep command, `requirements.md` statuses (ACC-1 partial).
+- [ ] `.claude/skills/review-standards/SKILL.md`: run Semgrep through Docker (plan §7's local command) instead of "if installed", so the review doesn't skip the project rules. *(Added in T14.)*
 
 **Done when:** a fresh clone, following only the README, reaches the greeting. **Commit:** `docs: add README setup, ADR-004 and M0 doc updates [M0-23]`
 
