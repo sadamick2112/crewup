@@ -2,5 +2,20 @@ rules:
   - id: no-field-injection
     languages: [java]
     severity: ERROR
-    message: Red-commit stub (T14); the green commit writes the real pattern.
-    pattern: red_stub_matches_nothing()
+    message: >-
+      Field or setter injection. Inject through the constructor into a final field instead (JAVA-3).
+    metadata:
+      category: best-practice
+      standard: JAVA-3
+      requirement: M0-16
+    patterns:
+      - pattern-either:
+          - pattern: |
+              @$INJECT
+              $TYPE $FIELD;
+          - pattern: |
+              @$INJECT
+              $RET $METHOD(...) { ... }
+      - metavariable-regex:
+          metavariable: $INJECT
+          regex: ^(org\.springframework\.beans\.factory\.annotation\.Autowired|jakarta\.inject\.Inject|Autowired|Inject)$

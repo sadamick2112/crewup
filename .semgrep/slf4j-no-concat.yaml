@@ -2,5 +2,33 @@ rules:
   - id: slf4j-no-concat
     languages: [java]
     severity: ERROR
-    message: Red-commit stub (T14); the green commit writes the real pattern.
-    pattern: red_stub_matches_nothing()
+    message: >-
+      Log message built by concatenation or formatting. Use SLF4J placeholders ("Created event {}") or
+      key-values (addKeyValue) instead (JAVA-12, LOG-1).
+    metadata:
+      category: best-practice
+      standard: JAVA-12
+      requirement: M0-16
+    patterns:
+      - pattern-either:
+          # Classic API: log.info(message, args...)
+          - patterns:
+              - pattern: (org.slf4j.Logger $LOG).$LEVEL($MSG, ...)
+              - metavariable-regex:
+                  metavariable: $LEVEL
+                  regex: ^(trace|debug|info|warn|error)$
+          # Fluent API: log.atInfo().addKeyValue(...).log(message, args...)
+          - patterns:
+              - pattern: (org.slf4j.Logger $LOG).$AT(...). ... .log($MSG, ...)
+              - metavariable-regex:
+                  metavariable: $AT
+                  regex: ^at(Trace|Debug|Info|Warn|Error|Level)$
+      - metavariable-pattern:
+          metavariable: $MSG
+          patterns:
+            - pattern-either:
+                - pattern: '"..." + $X'
+                - pattern: '$X + "..."'
+                - pattern: String.format(...)
+                - pattern: '"...".formatted(...)'
+            - pattern-not: '"..." + "..."'
