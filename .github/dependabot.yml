@@ -1,0 +1,48 @@
+# Dependabot version updates (M0-18, plan §7). Security updates and alerts are repository settings (T17).
+# Weekly, with minor and patch updates grouped into one PR per ecosystem; each major update gets its own PR, so it
+# is reviewed against the version rule in plan §2. Not covered: the scanner images in security.yml (bump by hand).
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    # Deliberate holds from plan §2, each blocked by a tool that doesn't support the next major yet. Remove the entry
+    # when its blocker is resolved.
+    ignore:
+      # TypeScript 7 has no JavaScript API until 7.1, so typescript-eslint and openapi-typescript break.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # eslint-plugin-jsx-a11y doesn't support ESLint 10 yet (jsx-eslint/eslint-plugin-jsx-a11y#1075).
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+
+  # Actions in .github/workflows, pinned by commit SHA; Dependabot updates the SHA and the version comment.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  # Images in docker-compose.yml (Postgres, Keycloak).
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
