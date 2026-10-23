@@ -4,6 +4,20 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-23 · T16 done: documentation (T17 next)
+
+**Decided**
+1. **`requirements.md` got a status table (§11)**, since it had no status field: unlisted requirements are not started, "Partial" names the milestone that finishes the rest. M0 rows: ACC-1 (social login in M8), NFR-2, NFR-3, NFR-4, NFR-8, NFR-9. T17 updates it when M0 is marked done.
+2. **ADR-004 is Accepted** (`docs/adr/004-oidc-provider.md`, the first ADR file), with the hosted provider still chosen in M8. `architecture.md` §10 links it. It covers Keycloak for development, SPA + PKCE with in-memory tokens (BFF rejected for now), CSRF off for the bearer-token API (Semgrep `nosemgrep` and the CodeQL dismissal), and the same-site provider requirement for silent sign-in in M8.
+3. **The README's optional gitleaks pre-commit hook runs through Docker** (`git /repo --staged --redact`, M0-17), like the other local scans. No Python or Go install needed.
+4. **DB-1** now states the timestamp versions and `<module>_` prefix (`V<yyyyMMddHHmmss>__<module>_<what>.sql`). `coding-standards.md`, CLAUDE.md and `/review-standards` use the Docker Semgrep command, so the review no longer skips the project rules.
+
+**Learned**
+- **Fresh-clone check passed:** a scratch clone, following only the README (`cp .env.example .env`, `docker compose up -d`, `./mvnw spring-boot:run`, `npm ci && npm run dev`), passed `npm run e2e` 4/4, i.e. sign-in and greeting. Health showed `db: UP`, and `/api/me` without a token returned 401 `application/problem+json`. Not exercised: the one-time `npx playwright install` steps, because Chromium was already cached on this machine.
+- Compose's fixed project name (`name: crewup`) means a second checkout's `docker compose up` replaces the running containers instead of starting new ones. The check ran `docker compose down` first and restored the stack from the repo afterwards.
+- From `docker compose up -d`, both services were healthy in about 30 seconds.
+- The staged-secret hook command was tried in a scratch clone: a fake `ghp_` token staged → "leaks found: 1", exit 1.
+
 ## 2026-10-23 · T15 done: CodeQL and Dependabot (T16 next)
 
 **Decided**

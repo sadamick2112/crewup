@@ -30,13 +30,15 @@ Testing: JUnit 5, Testcontainers, Modulith tests, Vitest, React Testing Library,
 ## Commands
 
 <!-- Fill these in during Milestone 0 -->
-- Start dependencies: `docker compose up -d`
-- Backend (Maven, via the wrapper): `./mvnw spring-boot:run` · test: `./mvnw test` · full build with integration tests: `./mvnw verify`
-- Backend formatting: `./mvnw spotless:apply` (fix) · `./mvnw spotless:check` (check; also runs in `verify`)
-- Frontend: `npm run dev` · test: `npm test` · lint: `npm run lint` · format: `npm run format` · type check: `npm run typecheck` · coverage: `npm run test:coverage`
+- Start dependencies (repo root): `docker compose up -d` (first time: `cp .env.example .env`)
+- Backend (in `backend/`, Maven via the wrapper): `./mvnw spring-boot:run` · test: `./mvnw test` · full build with integration tests, coverage and formatting check: `./mvnw verify`
+- Backend formatting (in `backend/`): `./mvnw spotless:apply` (fix) · `./mvnw spotless:check` (check; also runs in `verify`)
+- Update the API contract `api/openapi.json` after an API change (in `backend/`): `./mvnw test -Dtest=OpenApiContractTest -Dopenapi.update=true`
+- Frontend (all npm commands in `frontend/`): `npm run dev` · test: `npm test` · lint: `npm run lint` · format: `npm run format` (check: `npm run format:check`) · type check: `npm run typecheck` · coverage: `npm run test:coverage`
+- Regenerate API client (in `frontend/`): `npm run gen:api` (reads `../api/openapi.json`, so update the contract first)
+- End-to-end tests (in `frontend/`): `npm run e2e` (needs Compose and the backend running)
+- Semgrep (repo root, Docker): `docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.182.0 semgrep scan --metrics=off --config .semgrep --error` · rule tests: `docker run --rm -v "$PWD/.semgrep:/rules:ro" semgrep/semgrep:1.182.0 semgrep --test --metrics=off /rules`
 - Standards review before a PR: `/review-standards`
-- Regenerate API client: `npm run gen:api`
-- End-to-end tests: `npm run e2e`
 
 ## Conventions
 

@@ -153,10 +153,10 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 **Done when:** CodeQL results show in the Security tab, and Dependabot config is accepted (Insights → Dependency graph → Dependabot). *(The Dependabot check needs the file on `main`, so it moved to T17.)* **Commit:** `ci(security): add CodeQL analysis and Dependabot [M0-15, M0-18]`
 
 ### T16 · Documentation [spec §4]
-- [ ] README: what CrewUp is, prerequisites, run locally (`cp .env.example .env` …), dev user (DEV ONLY), the security scans CI runs, and how to run Semgrep locally.
-- [ ] `docs/adr/004-oidc-provider.md`: Keycloak for development, SPA + PKCE with in-memory tokens, CSRF off for the stateless API, and the same-site requirement for silent sign-in in M8.
-- [ ] CLAUDE.md commands (npm in `frontend/`, `openapi.update`), `coding-standards.md` DB-1 (timestamp versions) and the local Semgrep command, `requirements.md` statuses (ACC-1 partial).
-- [ ] `.claude/skills/review-standards/SKILL.md`: run Semgrep through Docker (plan §7's local command) instead of "if installed", so the review doesn't skip the project rules. *(Added in T14.)*
+- [x] README: what CrewUp is, prerequisites, run locally (`cp .env.example .env` …), dev user (DEV ONLY), the security scans CI runs, and how to run Semgrep locally.
+- [x] `docs/adr/004-oidc-provider.md`: Keycloak for development, SPA + PKCE with in-memory tokens, CSRF off for the stateless API, and the same-site requirement for silent sign-in in M8.
+- [x] CLAUDE.md commands (npm in `frontend/`, `openapi.update`), `coding-standards.md` DB-1 (timestamp versions) and the local Semgrep command, `requirements.md` statuses (ACC-1 partial).
+- [x] `.claude/skills/review-standards/SKILL.md`: run Semgrep through Docker (plan §7's local command) instead of "if installed", so the review doesn't skip the project rules. *(Added in T14.)*
 
 **Done when:** a fresh clone, following only the README, reaches the greeting. **Commit:** `docs: add README setup, ADR-004 and M0 doc updates [M0-23]`
 

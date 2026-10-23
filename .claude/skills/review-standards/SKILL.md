@@ -21,7 +21,7 @@ Review the changes on the current branch against `docs/coding-standards.md` and 
 3. **Run the automated checks** that exist in the project, and include their failures in the report. Skip any that aren't set up yet and say which were skipped.
    - Backend: `./mvnw -q spotless:check`
    - Frontend (from the frontend directory): `npm run lint`, `npm run typecheck`, `npm run test:coverage` (coverage limits and axe checks)
-   - Semgrep, if installed: `semgrep --config .semgrep --error`
+   - Semgrep project rules, through Docker from the repo root (no local install needed, so don't skip it): `docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.182.0 semgrep scan --metrics=off --config .semgrep --error`. Semgrep scans only files git tracks, so untracked files (not yet `git add`ed) are left out; say so if there are any.
 
 4. **Review against the rules marked *Review*.** Go through each changed file and apply every rule group relevant to it (for example, JAVA, MOD, API and TEST for a new controller and its tests). Also check:
    - every new behavior has a test, and test names reference requirement IDs (TEST-1, TEST-2)

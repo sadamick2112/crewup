@@ -196,7 +196,7 @@ Each acceptance criterion in `requirements.md` maps to a test. Test names refere
 | 001 | Modular monolith with Spring Modulith instead of microservices per Activity Type | Accepted |
 | 002 | React + TypeScript web/PWA first; React Native/Expo for mobile later | Accepted |
 | 003 | User/Member split; roles on Member | Proposed |
-| 004 | OIDC provider: Keycloak for development; hosted provider TBD | Proposed |
+| 004 | OIDC provider: Keycloak for development; hosted provider TBD. SPA + PKCE with in-memory tokens, CSRF off for the stateless API ([004-oidc-provider.md](adr/004-oidc-provider.md)) | Accepted (2026-10-23); hosted provider chosen in M8 |
 | 005 | Hosting platform | Open |
 | 006 | AI: Spring AI + Claude by default, local LLM (Ollama) as a configurable alternative; tool calling, hybrid scoring | Proposed |
 | 007 | Per-group catalogs instead of a shared global catalog | Accepted (2026-10-13) |

@@ -16,7 +16,7 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 | **ESLint** | TypeScript and React code rules, React hooks rules, accessibility | `npm run lint` |
 | **Prettier** | TypeScript, CSS, JSON and Markdown formatting | `npm run format` |
 | **TypeScript compiler** (`strict`) | Type errors | `npm run typecheck` |
-| **Semgrep** (project rules in `.semgrep/`) | Security and project-specific patterns | `semgrep --config .semgrep` |
+| **Semgrep** (project rules in `.semgrep/`) | Security and project-specific patterns | From the repo root, through Docker: `docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.182.0 semgrep scan --metrics=off --config .semgrep --error` (the full CI scan and the rule tests are in the README) |
 | **JaCoCo** / **Vitest coverage** | Coverage at least 80% line and 70% branch | `./mvnw verify` / `npm run test:coverage` |
 | **axe-core** (component tests, Playwright) | Accessibility violations on rendered pages | `npm test` / `npm run e2e` |
 | **Spring Modulith** `verify()` | Module boundaries | `./mvnw test` |
@@ -86,7 +86,7 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 
 ## Database and migrations (DB)
 
-- **DB-1** Each module has its own Flyway folder. Scripts are named `V<number>__<what_it_does>.sql`. *Review*
+- **DB-1** Each module has its own Flyway folder, `db/migration/<module>/`. Scripts are named `V<yyyyMMddHHmmss>__<module>_<what_it_does>.sql` (for example `V20261014120000__identity_create_users.sql`): timestamp versions keep migrations from different module folders from colliding. *Review*
 - **DB-2** Never edit a migration that has been merged to `main`. Fix it with a new migration. *Review*
 - **DB-3** Table and column names are `snake_case`. Activity Type tables are prefixed with the module name (`dining_restaurant`). *Review*
 - **DB-4** Primary keys are `uuid` (v7). Instants are `timestamptz`. *Review*
