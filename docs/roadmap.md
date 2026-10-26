@@ -8,7 +8,7 @@ Each milestone is a vertical slice (database → API → UI → tests) that ends
 
 | # | Milestone | Requirements | What you'll learn |
 |---|---|---|---|
-| **M0** | **Foundation:** repository, `CLAUDE.md`, Docker Compose (Postgres, Keycloak), Spring Boot + Modulith skeleton, React + Vite skeleton, CI pipeline with security scanning (Semgrep, CodeQL, gitleaks, Dependabot), generated API client, "hello authenticated user" end to end | ACC-1 | Claude Code basics, plan mode, CLAUDE.md, the frontend toolchain |
+| **M0** ✅ | **Done** (PR #1, October 2026). **Foundation:** repository, `CLAUDE.md`, Docker Compose (Postgres, Keycloak), Spring Boot + Modulith skeleton, React + Vite skeleton, CI pipeline with security scanning (Semgrep, CodeQL, gitleaks, Dependabot), generated API client, "hello authenticated user" end to end | ACC-1 | Claude Code basics, plan mode, CLAUDE.md, the frontend toolchain |
 | **M1** | **Groups and members:** create/edit/delete group, members (including historical), profile editing, group switcher | GRP-1…4, MEM-1…5, ACC-2 | React forms, TanStack Query, JPA modules |
 | **M2** | **Roles and invites:** permission matrix, method security, a guard test for endpoints missing `@PreAuthorize`, QR invite and link, claim a historical profile | ROL-1…2, INV-1…3 | Spring Security, authorization tests, QR generation |
 | **M3** | **Events core:** Event/Activity CRUD, Activity Type SPI and frontend registry with a "Generic" type (log only), attendee picker, copy event | EVT-1…7, PICK-1…4 | The plug-in architecture, the mobile-first create flow |

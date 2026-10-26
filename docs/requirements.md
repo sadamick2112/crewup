@@ -290,7 +290,7 @@ None at the moment.
 
 ## 11. Implementation status
 
-Requirements not listed here are **not started**. Each milestone updates this table (roadmap definition of done). **Partial** means some of the requirement works and the rest is planned for the milestone named in the notes.
+As of M0 (done, PR #1). Requirements not listed here are **not started**. Each milestone updates this table (roadmap definition of done). **Partial** means some of the requirement works and the rest is planned for the milestone named in the notes.
 
 | ID | Status | Since | Notes |
 |---|---|---|---|

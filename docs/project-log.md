@@ -4,6 +4,23 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-26 · T17: repository settings, review, verification (merge next)
+
+**Decided**
+1. **`main` is protected by one branch ruleset, `protect-main`**, not classic branch protection: GitHub now sets code scanning thresholds only in rulesets ("Require code scanning results"). No bypass; deletion and force pushes blocked; a PR with **0 approvals** (GitHub doesn't let you approve your own PR); required checks `backend`, `frontend`, `api-client`, `semgrep`, `gitleaks`, `CodeQL (java-kotlin)`, `CodeQL (javascript-typescript)`; CodeQL results gated at security "High or higher", alerts "Errors". Semgrep isn't in the code scanning rule, because its job already gates on `ERROR`. Plan §9 updated. **Every change to `main` now goes through a PR**, docs included.
+2. **`/review-standards` verdict: Ready for PR** (0 must-fix). Fixed: TEST-10, the `/auth/callback` page had no axe component test (`AuthCallbackPage.test.tsx`, 3 tests, shown to fail with the page's loading check inverted). Accepted as they are, with no history rewrite on the pushed branch: 12 housekeeping commits without IDs (GIT-1) and the follow-up "record and check off" commits of T13–T15 (GIT-2).
+3. **Standards PR after the merge:** GIT-1 becomes "with requirement IDs where one applies"; GIT-2 says the checkbox and log entry go in the task's last commit. It's a separate PR from `main` because `coding-standards.md` isn't on `main` until M0 merges (listed in T17).
+4. **Merge PR #1 with a merge commit, not squash**, so `main` keeps the red→green commit pairs that TEST-2 and `/review-standards` check.
+5. M0 is marked done in `roadmap.md` (M0 row) and `requirements.md` §11 on the branch, since `main` takes changes only through a PR.
+
+**Learned**
+- **Required-check names:** `Semgrep OSS` and `CodeQL` (without a suffix) are GitHub's code scanning *result* checks, not our jobs. Picking `Semgrep OSS` by mistake would have left the `semgrep` job (rule tests, error gate) not required; it was swapped for `semgrep` (source GitHub Actions, `integration_id` 15368).
+- The ruleset's `pull_request` rule shows `require_extra_approval_for_unattributed_changes: true`, which GitHub's REST docs don't list. It didn't block: PR #1's merge state was `CLEAN`. If a merge ever asks for an approval despite 0 required, look there first.
+- Check with `gh api repos/<owner>/<repo>/rules/branches/main` (the rules in effect) and `…/vulnerability-alerts` (204 = alerts on).
+- **Verification (plan):** 1, fresh clone (T16); 2, by hand: register a new account, sign out, sign in as the dev user, reload stays signed in, sign out; 3, `/api/me` → 401 Problem Details, health `UP` with `db`; 4, `./mvnw verify` 35 tests (JaCoCo 99.3% lines, 88.9% branches), frontend checks and 24 tests (94.2% / 87.5%), `npm run e2e` 4/4; 5, all 9 PR checks green.
+- **Follow-up:** after the backend tests, Surefire waits 30 s and kills the forked JVM ("going to kill self fork JVM … after System.exit(0)", printed as `[ERROR]`, build still passes; also in CI). Something keeps a non-daemon thread alive, probably the fake Keycloak's `HttpServer` or Testcontainers. Worth fixing early in M1: it costs 30 s per build.
+- Docker Desktop can stop on its own between sessions; WSL then reports "The command 'docker' could not be found". Start Docker Desktop on Windows.
+
 ## 2026-10-23 · T16 done: documentation (T17 next)
 
 **Decided**
