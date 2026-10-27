@@ -172,7 +172,7 @@ Pinned in T1 on **October 14, 2026**, from start.spring.io, `repo1.maven.org` me
   - Scan with the project rules: `docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.182.0 semgrep scan --metrics=off --config .semgrep` (add the registry `--config`s from CI for the full scan).
   - Test the rules: `docker run --rm -v "$PWD/.semgrep:/rules:ro" semgrep/semgrep:1.182.0 semgrep --test --metrics=off /rules`.
   - Secrets: `docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --verbose` (add `--log-opts="origin/main..HEAD"` for the branch only, or `--staged` before a commit).
-- **`.github/dependabot.yml`:** weekly updates for `maven` (`/backend`), `npm` (`/frontend`), `github-actions` (`/`), and `docker-compose` (`/`), with minor and patch updates grouped. *(T15: a 7-day `cooldown` on each, after Semgrep's `dependabot-missing-cooldown` warning; major TypeScript and ESLint updates ignored, matching the §2 holds.)*
+- **`.github/dependabot.yml`:** weekly updates for `maven` (`/backend`), `npm` (`/frontend`), `github-actions` (`/`), and `docker-compose` (`/`), with minor and patch updates grouped. *(T15: a 7-day `cooldown` on each, after Semgrep's `dependabot-missing-cooldown` warning; major TypeScript and ESLint updates ignored, matching the §2 holds. T17, after the first run: majors of `@eslint/js` (ships with ESLint) and `@types/node` (follows Node 24 in `.nvmrc`) ignored too, and `vitest` + `@vitest/*` grouped so they always update together.)*
 - **Supply chain:** third-party GitHub Actions are pinned by commit SHA with a version comment, and Dependabot keeps them current.
 
 ## 8. Code quality tooling (M0-20 … M0-23)

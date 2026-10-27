@@ -23,16 +23,25 @@ updates:
     cooldown:
       default-days: 7
     groups:
+      # Vitest and its coverage provider must share a version, so they always update in one PR, majors included.
+      # Listed first: a dependency joins the first group it matches.
+      vitest:
+        patterns: [vitest, "@vitest/*"]
       minor-and-patch:
         update-types: [minor, patch]
-    # Deliberate holds from plan §2, each blocked by a tool that doesn't support the next major yet. Remove the entry
-    # when its blocker is resolved.
+    # Deliberate holds from plan §2. Remove an entry when its reason no longer applies.
     ignore:
       # TypeScript 7 has no JavaScript API until 7.1, so typescript-eslint and openapi-typescript break.
       - dependency-name: typescript
         update-types: [version-update:semver-major]
-      # eslint-plugin-jsx-a11y doesn't support ESLint 10 yet (jsx-eslint/eslint-plugin-jsx-a11y#1075).
+      # eslint-plugin-jsx-a11y doesn't support ESLint 10 yet (jsx-eslint/eslint-plugin-jsx-a11y#1075). @eslint/js
+      # ships with ESLint, so it's held with it.
       - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: "@eslint/js"
+        update-types: [version-update:semver-major]
+      # Node's type definitions follow the Node major in .nvmrc (24), not the newest Node.
+      - dependency-name: "@types/node"
         update-types: [version-update:semver-major]
 
   # Actions in .github/workflows, pinned by commit SHA; Dependabot updates the SHA and the version comment.
