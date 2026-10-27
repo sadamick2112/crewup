@@ -142,6 +142,6 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 
 ## Git and pull requests (GIT)
 
-- **GIT-1** Commits follow Conventional Commits with requirement IDs: `feat(dining): add restaurant reviews [DIN-3]`. *Review*
-- **GIT-2** One task from `tasks.md` at a time: a test-first task has two commits (failing tests, then implementation), and an exempt task has one. *Review*
+- **GIT-1** Commits follow Conventional Commits, with requirement IDs where one applies: `feat(dining): add restaurant reviews [DIN-3]`. Housekeeping commits that serve no requirement (a `.gitignore` entry, a project-log note) have none. *Review*
+- **GIT-2** One task from `tasks.md` at a time: a test-first task has two commits (failing tests, then implementation), and an exempt task has one. The task's checkbox in `tasks.md` and its `project-log.md` entry go in the task's last commit, not a follow-up commit. *Review*
 - **GIT-3** A pull request covers one spec (or part of one), passes CI, and has had `/review-standards` run with no unresolved findings. *PR template*
