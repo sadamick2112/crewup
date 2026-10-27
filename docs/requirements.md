@@ -213,7 +213,7 @@ General rules for all AI features:
 | **NFR-6 Time** | Store instants in UTC with the Event's IANA time zone. Display in the viewer's local time. |
 | **NFR-7 Auditability** | Every record has created and updated timestamps and authors. Deletes are soft for 30 days. |
 | **NFR-8 Testability** | Every requirement ID maps to at least one automated test. Module boundaries are verified in CI. |
-| **NFR-9 Operability** | Structured logs, health checks, and basic metrics. Runs locally with one `docker compose up`. |
+| **NFR-9 Operability** | Structured logs with a trace ID on every line, request tracing from the browser through the backend, health checks, and basic metrics. Runs locally with one `docker compose up`. |
 | **NFR-10 AI cost** | AI calls are metered per group. Responses are cached (for example, board game details by BGG ID). |
 
 ## 7. Logical data model
@@ -287,3 +287,16 @@ All resolved on October 13, 2026.
 ## 10. Open questions
 
 None at the moment.
+
+## 11. Implementation status
+
+As of M0 (done, PR #1). Requirements not listed here are **not started**. Each milestone updates this table (roadmap definition of done). **Partial** means some of the requirement works and the rest is planned for the milestone named in the notes.
+
+| ID | Status | Since | Notes |
+|---|---|---|---|
+| ACC-1 | Partial | M0 | Email/password sign-up, sign-in and sign-out through the OIDC provider; `GET /api/me` provisions the User. Social login in M8 (ADR-004). |
+| NFR-2 | Partial | M0 | OIDC resource server, no secrets in the repo, CI security scans (Semgrep, CodeQL, gitleaks, Dependabot). Group-scoped authorization arrives with groups (M1, M2). |
+| NFR-3 | Partial | M0 | Home page usable at 360 px (Playwright check). PWA later. |
+| NFR-4 | Partial | M0 | axe checks (component tests and Playwright) on every page so far. Applies to each new page. |
+| NFR-8 | Partial | M0 | Test names reference requirement IDs; Modulith `verify()` runs in CI. Applies to each new requirement. |
+| NFR-9 | Partial | M0 | Structured logs with trace IDs, browser-to-backend trace correlation, health check, `docker compose up` for local services. Basic metrics not yet. |

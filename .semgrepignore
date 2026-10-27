@@ -1,0 +1,24 @@
+# Paths `semgrep scan` skips. A root .semgrepignore replaces Semgrep's built-in list
+# (src/targeting/default.semgrepignore in semgrep/semgrep), so its entries are repeated here, except one:
+# Semgrep skips test/ and tests/ by default, but tests follow the same standards (JAVA-3, JAVA-14, GEN-6),
+# so they are scanned too. Semgrep also skips files git doesn't track (target/, coverage/, ...).
+
+# Version control
+.git
+.svn
+.hg
+
+# Build output and vendored code
+build/
+vendor/
+dist/
+*.min.js
+
+# Package managers
+node_modules/
+.npm/
+.yarn/
+.venv/
+
+# Rule fixtures contain the flagged patterns on purpose; `semgrep --test .semgrep` checks them instead.
+.semgrep/

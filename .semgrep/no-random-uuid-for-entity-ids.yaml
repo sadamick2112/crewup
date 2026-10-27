@@ -1,0 +1,12 @@
+rules:
+  - id: no-random-uuid-for-entity-ids
+    languages: [java]
+    severity: ERROR
+    message: >-
+      UUID.randomUUID() creates a version 4 UUID. Use Ids.newId() (UUID v7) for IDs, and also for unique
+      test values (JAVA-14).
+    metadata:
+      category: best-practice
+      standard: JAVA-14
+      requirement: M0-16
+    pattern: java.util.UUID.randomUUID()

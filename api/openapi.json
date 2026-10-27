@@ -1,0 +1,104 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "CrewUp API",
+    "version" : "v1"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "security" : [ {
+    "bearerAuth" : [ ]
+  } ],
+  "paths" : {
+    "/api/me" : {
+      "get" : {
+        "tags" : [ "Profile" ],
+        "summary" : "Get the signed-in user's profile",
+        "description" : "The first call creates the user from the access token; later calls return the same user.",
+        "operationId" : "me",
+        "responses" : {
+          "200" : {
+            "description" : "The signed-in user's profile",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid access token",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ProblemDetail" : {
+        "type" : "object",
+        "description" : "An error, as RFC 9457 Problem Details",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "format" : "uri",
+            "description" : "Identifies the kind of error, e.g. urn:crewup:problem:unauthenticated"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "detail" : {
+            "type" : "string"
+          },
+          "instance" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "traceId" : {
+            "type" : "string",
+            "description" : "The request's trace ID; shown to users as the error's reference"
+          }
+        },
+        "required" : [ "status", "title", "traceId" ]
+      },
+      "UserProfile" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "displayName" : {
+            "type" : "string",
+            "description" : "Name shown to other members"
+          },
+          "email" : {
+            "type" : [ "string", "null" ],
+            "description" : "Null if the identity provider has no email for the user"
+          }
+        },
+        "required" : [ "displayName", "email", "id" ]
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}

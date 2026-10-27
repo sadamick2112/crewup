@@ -7,6 +7,7 @@ A shared memory log for long-running friend groups: plan get-togethers, log acti
 - `docs/requirements.md` contains requirement IDs (such as EVT-5). Every feature traces to IDs.
 - `docs/architecture.md` explains modules, the Activity Type plug-in contract, and security.
 - `docs/roadmap.md` lists milestones and the definition of done.
+- `docs/coding-standards.md` — the coding rules, with IDs such as JAVA-3. Follow them in all code you write, and cite the rule ID when you deliberately break one.
 - Before implementing a feature, read its `docs/specs/<feature>/spec.md`, `plan.md`, and `tasks.md`. If they don't exist, stop and propose creating them.
 
 ## Principles (the project's constitution)
@@ -15,8 +16,10 @@ A shared memory log for long-running friend groups: plan get-togethers, log acti
 2. **Module boundaries are law.** Activity Type modules (`dining`, `boardgames`, `movies`) never import each other. They use only the published APIs of `events` and `groups`, plus application events.
 3. **Group-scoped everything.** Every group resource is under `/api/groups/{groupId}`, and every endpoint checks group permissions.
 4. **AI proposes, the user confirms.** AI never writes data without confirmation, and every AI feature has a manual fallback.
-5. **Tests prove requirements.** Test names reference requirement IDs. Write or update tests in the same change as the code.
-6. **Small steps.** One task from `tasks.md` at a time: implement, test, commit.
+5. **Test first for logic and APIs.** For domain rules, endpoints, and bug fixes: write tests from the acceptance criteria, run them to confirm they fail, commit, then implement. Never modify a committed test to make it pass; ask instead. Setup, configuration, and visual styling are exempt. Test names reference requirement IDs.
+6. **Small steps.** One task from `tasks.md` at a time. Test-first tasks: failing tests → commit → implement until green → commit. Exempt tasks: implement, test, commit.
+7. **Coverage is a floor, not a goal.** CI enforces thresholds (JaCoCo, Vitest). Never write a test just to raise coverage: every test asserts behavior from the acceptance criteria. Don't lower thresholds or add exclusions without asking. If the check fails, follow TEST-12 in `docs/coding-standards.md`: one pass at testing untested criteria and deleting dead code, then stop and report.
+8. **Standards are checked, not hoped for.** Code follows `docs/coding-standards.md`. Run the formatters before committing (`./mvnw spotless:apply`, `npm run format`), and run `/review-standards` before opening a pull request.
 
 ## Stack
 
@@ -27,11 +30,15 @@ Testing: JUnit 5, Testcontainers, Modulith tests, Vitest, React Testing Library,
 ## Commands
 
 <!-- Fill these in during Milestone 0 -->
-- Start dependencies: `docker compose up -d`
-- Backend (Maven, via the wrapper): `./mvnw spring-boot:run` · test: `./mvnw test` · full build with integration tests: `./mvnw verify`
-- Frontend: `npm run dev` · test: `npm test` · lint: `npm run lint`
-- Regenerate API client: `npm run gen:api`
-- End-to-end tests: `npm run e2e`
+- Start dependencies (repo root): `docker compose up -d` (first time: `cp .env.example .env`)
+- Backend (in `backend/`, Maven via the wrapper): `./mvnw spring-boot:run` · test: `./mvnw test` · full build with integration tests, coverage and formatting check: `./mvnw verify`
+- Backend formatting (in `backend/`): `./mvnw spotless:apply` (fix) · `./mvnw spotless:check` (check; also runs in `verify`)
+- Update the API contract `api/openapi.json` after an API change (in `backend/`): `./mvnw test -Dtest=OpenApiContractTest -Dopenapi.update=true`
+- Frontend (all npm commands in `frontend/`): `npm run dev` · test: `npm test` · lint: `npm run lint` · format: `npm run format` (check: `npm run format:check`) · type check: `npm run typecheck` · coverage: `npm run test:coverage`
+- Regenerate API client (in `frontend/`): `npm run gen:api` (reads `../api/openapi.json`, so update the contract first)
+- End-to-end tests (in `frontend/`): `npm run e2e` (needs Compose and the backend running)
+- Semgrep (repo root, Docker): `docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.182.0 semgrep scan --metrics=off --config .semgrep --error` · rule tests: `docker run --rm -v "$PWD/.semgrep:/rules:ro" semgrep/semgrep:1.182.0 semgrep --test --metrics=off /rules`
+- Standards review before a PR: `/review-standards`
 
 ## Conventions
 

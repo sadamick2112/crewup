@@ -1,0 +1,86 @@
+# Semgrep and gitleaks for every pull request to main and every push to main (M0-15, M0-16, M0-17, plan §7).
+# CodeQL has its own workflow. Each scan is a plain `docker run`, so the same command works locally.
+name: Security
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Least privilege: the jobs only read the repository; the Semgrep job adds what the SARIF upload needs.
+permissions:
+  contents: read
+
+# A newer push to a PR cancels the run it supersedes. Every push to main keeps its run.
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Scanner images are pinned by tag and digest (plan §7). Dependabot doesn't update these lines, so bump them by hand.
+env:
+  SEMGREP_IMAGE: semgrep/semgrep:1.182.0@sha256:4a34048c04fef049f71665047f074cffb00cc3d89482f965a5cd151d589237af
+  GITLEAKS_IMAGE: ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      # Actions are pinned by commit SHA (plan §7); Dependabot keeps them current.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The project rules are tested before their results are trusted. `semgrep --test` finds no tests under a
+      # hidden path such as .semgrep, so the folder is mounted as /rules.
+      - name: Test project rules
+        run: docker run --rm -v "$PWD/.semgrep:/rules:ro" "$SEMGREP_IMAGE" semgrep --test --metrics=off /rules
+
+      # The registry has no p/spring pack; r/java.spring is Semgrep's Spring rule folder. Writes every finding to
+      # SARIF (for code scanning) and JSON (for the gate below), and prints them in the log.
+      - name: Scan
+        run: >-
+          docker run --rm -v "$PWD:/src" -w /src "$SEMGREP_IMAGE"
+          semgrep scan --metrics=off
+          --config p/java --config r/java.spring --config p/typescript --config p/react --config p/owasp-top-ten
+          --config .semgrep
+          --text --sarif-output=semgrep.sarif --json-output=semgrep.json
+
+      - name: Upload results to code scanning
+        if: ${{ !cancelled() && hashFiles('semgrep.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+      # Error-severity findings fail the job; warnings show in code scanning only. Findings suppressed with a
+      # `nosemgrep` comment are left out of the JSON.
+      - name: Fail on error-severity findings
+        run: |
+          errors=$(jq '[.results[] | select(.extra.severity == "ERROR")] | length' semgrep.json)
+          echo "Error-severity findings: $errors"
+          test "$errors" -eq 0
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # gitleaks reads commits, not only the checked-out files, so it needs the full history.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # A pull request scans the commits it adds; a push to main scans the whole history. --redact keeps any
+      # secret found out of the public log.
+      - name: Scan commits for secrets
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          range=()
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            range=(--log-opts="$BASE_SHA..$HEAD_SHA")
+          fi
+          docker run --rm -v "$PWD:/repo" "$GITLEAKS_IMAGE" git /repo --redact --verbose "${range[@]}"
