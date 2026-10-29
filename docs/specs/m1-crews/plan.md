@@ -1,6 +1,6 @@
 # M1 — Crews and members: Plan
 
-**Status:** Draft · October 29, 2026 · Implements `spec.md` (Approved)
+**Status:** Approved · October 29, 2026 · Implements `spec.md` (Approved)
 
 ## Context
 
@@ -277,7 +277,7 @@ A signed-out user who opens a deep link sees the Welcome page; after sign-in the
 
 `src/test/renderWithProviders.tsx` renders a page at a given URL inside a `MemoryRouter` (a router that keeps its URL in memory instead of the address bar), with a fresh query cache, the real API client and a fake auth context. Page tests use it with MSW handlers (TEST-6).
 
-### 5.6 Changes to M0 tests (TEST-11; for approval with this plan)
+### 5.6 Changes to M0 tests (TEST-11; approved with this plan)
 
 Spec decision 8 approved moving "Sign out" into the user menu. Two more consequences surfaced while planning:
 

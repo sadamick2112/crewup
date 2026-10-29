@@ -1,6 +1,6 @@
 # M1 — Crews and members: Tasks
 
-**Status:** Draft · October 29, 2026 · From `plan.md` §7
+**Status:** Approved · October 29, 2026 · From `plan.md` §7
 
 One task at a time (CLAUDE.md principles 5–7). Check a task off in its last commit, together with its `project-log.md` entry (GIT-2). "Done when" is what must be true before the final commit; plan sections are in brackets.
 
@@ -168,6 +168,7 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in its last co
 ### T16 · Documentation [spec §5]
 - [ ] `requirements.md` §11: GRP-1 and MEM-2 partial (pictures), GRP-4 partial (M2), MEM-5 partial (M3, P2), NFR-7 partial; GRP-2, GRP-3, MEM-1, MEM-3, MEM-4, ACC-2 done. NFR-2 notes crew-scoped checks.
 - [ ] `docs/adr/003-user-member-split.md` (Accepted); `architecture.md` §10 links it, and §6 describes `CrewAccess` as built.
+- [ ] README: fix the branch-only gitleaks command, which scans 0 commits through Docker with `origin/main..HEAD` (project log, 2026-10-29); give a form that works, such as the two commit IDs.
 
 **Commit:** `docs: record M1 statuses and ADR-003 [GRP-1, MEM-2]`
 

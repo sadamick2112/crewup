@@ -7,8 +7,11 @@ Decisions and context from planning sessions, so any new Claude Code session can
 ## 2026-10-29 · M1 start: Surefire delay gone in CI, spec approved, "group" renamed "crew"
 
 **Decided**
-1. **M1 spec approved** (`docs/specs/m1-crews/spec.md`), with the decisions in its §7: pictures deferred, real access checks for M1's own rules, no restore and no leave/remove in M1, the app shell and eight screens. Plan and tasks are drafts awaiting approval.
+1. **M1 spec approved** (`docs/specs/m1-crews/spec.md`), with the decisions in its §7: pictures deferred, real access checks for M1's own rules, no restore and no leave/remove in M1, the app shell and eight screens. 
 2. **"Group" is renamed "crew" everywhere** (spec decision 19): screens, API paths (`/api/crews/{crewId}`), the module (`app.crewup.crews`), tables (`crews`, `crew_id`), and the living docs (CLAUDE.md, README, requirements, architecture, roadmap, coding standards, technology guide). Done before any code used the name, so it changed only docs. Requirement IDs keep GRP-*. **Kept as "group":** the "long-running friend groups" tagline, "Friend groups that have met for years" (requirements §1), "Group chat" (a non-goal), "radio group", and shadcn's `input-group`, `radio-group` and `RadioGroup`. **Not changed:** past log entries and the M0 spec, plan and tasks, which record history. The spec folder is now `docs/specs/m1-crews/` and the branch `feat/m1-crews`. The living-docs part merged first as PR #17, on its own because `coding-standards.md` changes go in their own PR.
+3. **M1 plan and tasks approved**, including plan §5.6: the M0 home page tests render through the app's routes, get a `GET /api/crews` handler, and open the user menu before "Sign out" (TEST-11, names and assertions unchanged, own `test:` commit before T9).
+4. **All eight Dependabot major-version holds stay** (milestone re-check, T17 entry). Last week's npm downloads by major: `typescript` 5: 59%, 6: 20%, 7: 14% (`typescript-eslint` 8.72.1 still allows `<6.1.0`, `openapi-typescript` 7.13.0 needs `^5.x`); `eslint` 9: 53%, 10: 23% (`eslint-plugin-jsx-a11y` 6.10.2 still declares ESLint ≤ 9, issue #1075 open); `@eslint/js` follows ESLint; `@types/node` follows Node 24 (Node 26 became LTS on 2026-10-28; Node 24 is in maintenance until 2028-04-30, so no move yet); `vitest` 4: 47% vs 5: 28%; `msw` 2: 86% vs 3: 8%; `react-router` 7: 45% vs 8: 12%. Re-check at the start of M2.
+5. **The README's gitleaks command is fixed in M1's T16**, not in a separate PR.
 
 **Learned**
 - **The Surefire 30 s "kill self fork JVM" delay is gone in CI too.** PR #16's `backend` job log (run 40943543169) has no "kill self fork" line and the Maven build took 29 s; the first `main` run after the Boot 4.1.2 merge (40946111321) also has none, 35 s. Before the fix, `main` run 40546676813 (Oct 27) printed the message and took 1:07 min. The one shared test context (entry below) was the fix; no thread hunt needed.
@@ -393,5 +396,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Approve the M1 plan and tasks (`docs/specs/m1-crews/`), then build M1 task by task on `feat/m1-crews`.
-2. At the start of M1: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).
+1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`), starting with T1.
+2. At the start of M2: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).
