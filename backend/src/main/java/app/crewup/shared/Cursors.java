@@ -1,9 +1,11 @@
 package app.crewup.shared;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -24,7 +26,15 @@ public class Cursors {
 
     /** The sort key a cursor holds; empty when there is no cursor (the first page). */
     public <K> Optional<K> decode(String cursor, Class<K> keyType) {
-        throw new UnsupportedOperationException("not implemented");
+        if (cursor == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.ofNullable(json.readValue(Base64.getUrlDecoder().decode(cursor), keyType));
+        } catch (IllegalArgumentException | JacksonException e) {
+            // Not Base64, or not this list's key: a cursor the client made up or copied from another list.
+            throw new InvalidRequestException("cursor", "Not a cursor from this list");
+        }
     }
 
     /**
@@ -32,6 +42,14 @@ public class Cursors {
      * the cursor is the key of the last row kept.
      */
     public <T> CursorPage<T> page(List<T> rows, int limit, Function<T, ?> keyOf) {
-        throw new UnsupportedOperationException("not implemented");
+        if (rows.size() <= limit) {
+            return new CursorPage<>(rows, null);
+        }
+        List<T> items = List.copyOf(rows.subList(0, limit));
+        return new CursorPage<>(items, encode(keyOf.apply(items.getLast())));
+    }
+
+    private String encode(Object key) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(json.writeValueAsBytes(key));
     }
 }

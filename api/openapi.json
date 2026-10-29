@@ -44,6 +44,19 @@
   },
   "components" : {
     "schemas" : {
+      "InvalidField" : {
+        "type" : "object",
+        "properties" : {
+          "field" : {
+            "type" : "string",
+            "description" : "The request property's path, such as socialLinks[0].url; empty for the whole request"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "field", "message" ]
+      },
       "ProblemDetail" : {
         "type" : "object",
         "description" : "An error, as RFC 9457 Problem Details",
@@ -70,6 +83,13 @@
           "traceId" : {
             "type" : "string",
             "description" : "The request's trace ID; shown to users as the error's reference"
+          },
+          "errors" : {
+            "type" : "array",
+            "description" : "Only for urn:crewup:problem:invalid-request: one entry per invalid field",
+            "items" : {
+              "$ref" : "#/components/schemas/InvalidField"
+            }
           }
         },
         "required" : [ "status", "title", "traceId" ]

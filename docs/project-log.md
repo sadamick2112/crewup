@@ -4,6 +4,21 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-29 · M1 T1 done: shared API plumbing (T2 next)
+
+**Decided**
+1. **`ETags.requireMatch(ifMatch, currentVersion)`** replaces plan §4.4's `expectedVersion(...)` plus a comparison in each service: one call, which throws `428` (missing) or `412` (anything else, including a weak `W/"3"`, since `If-Match` compares strongly).
+2. **`ApiExceptionHandler` extends `ResponseEntityExceptionHandler`** and overrides only `handleMethodArgumentNotValid` and `handleHandlerMethodValidationException`. Spring's built-in errors (an unknown path's 404) keep their Problem Details, and Boot's `ProblemDetailsExceptionHandler` steps aside (it backs off when another `ResponseEntityExceptionHandler` exists), so no two advices compete for the same exception.
+3. **A committed test was corrected, with approval (TEST-11):** `doesNotContain("", null)` in `M1_1_invalidRequestReturns400WithFieldPaths` resolved to AssertJ's `doesNotContain(value, Index)` overload and threw. Commit `8530ed6` uses `doesNotContainNull().doesNotContain("")`.
+4. `ProblemDetailSchema` documents an optional `errors` array (`InvalidField`: `field`, `message`), so the contract and generated client have it for M1-22.
+
+**Learned**
+- **Red:** 22 new tests failed (18 on assertions, 4 on stubs throwing "not implemented"); the other 35 passed. **Green:** 54 tests, JaCoCo 99.5% lines, 89.3% branches.
+- **Probe controllers join `@IntegrationTest`'s `@Import`**, so they share the one cached context (2026-10-29 entry). `ApiErrorProbeController` is public because `IntegrationTest` lives in `app.crewup`.
+- `@Valid @RequestBody` errors arrive as `MethodArgumentNotValidException` with paths such as `links[0].url`; constraints on query parameters (`@Max` on `limit`) arrive as `HandlerMethodValidationException`, with no `@Validated` needed on the controller (Spring 6.1+).
+- A cursor that decodes to JSON `null` is treated as the first page rather than refused: harmless, and it avoids a branch no client can reach.
+- `getContentAsString()` on a MockMvc response throws a checked exception, so a test that reads the body declares `throws Exception`.
+
 ## 2026-10-29 · M1 start: Surefire delay gone in CI, spec approved, "group" renamed "crew"
 
 **Decided**
@@ -396,5 +411,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`), starting with T1.
+1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T2 (the caller's User id) next.
 2. At the start of M2: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).

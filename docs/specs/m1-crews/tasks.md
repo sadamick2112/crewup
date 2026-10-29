@@ -12,12 +12,12 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in its last co
 
 ### T1 · Shared API plumbing 🔴→🟢 [plan §4.4]
 **Red**
-- [ ] Test-only probe endpoints (like M0's `ApiProbeController`) that validate a request record, throw each `ApiProblemException` subclass, and return a `CursorPage`.
-- [ ] Tests: `M1_1_invalidRequestReturns400WithFieldPaths` (nested and list fields), `M1_5_missingIfMatchReturns428`, `M1_5_staleVersionReturns412`, `M1_5_concurrentSaveReturns412` (from `OptimisticLockingFailureException`), `notFoundReturns404WithTypeAndTraceId`; unit tests for `ETags` (format, missing, unparsable) and `Cursors` (round trip, tampered cursor → `400`, `limit` above 100 → `400`). Stubs that throw.
-- [ ] Run: all fail on assertions. **Commit:** `test(shared): add failing tests for API errors, ETags and cursors [M1-1, M1-5, M1-11]`
+- [x] Test-only probe endpoints (like M0's `ApiProbeController`) that validate a request record, throw each `ApiProblemException` subclass, and return a `CursorPage`.
+- [x] Tests: `M1_1_invalidRequestReturns400WithFieldPaths` (nested and list fields), `M1_5_missingIfMatchReturns428`, `M1_5_staleVersionReturns412`, `M1_5_concurrentSaveReturns412` (from `OptimisticLockingFailureException`), `notFoundReturns404WithTypeAndTraceId`; unit tests for `ETags` (format, missing, unparsable) and `Cursors` (round trip, tampered cursor → `400`, `limit` above 100 → `400`). Stubs that throw.
+- [x] Run: all fail on assertions. **Commit:** `test(shared): add failing tests for API errors, ETags and cursors [M1-1, M1-5, M1-11]`
 
 **Green**
-- [ ] `ApiProblemException` and its subclasses, `ApiExceptionHandler`, `ETags`, `CursorPage`, `Cursors`.
+- [x] `ApiProblemException` and its subclasses, `ApiExceptionHandler`, `ETags`, `CursorPage`, `Cursors`.
 
 **Done when:** the tests pass and `./mvnw verify` is green. **Commit:** `feat(shared): add API error handling, ETags and cursor pages [M1-1, M1-5, M1-11]`
 

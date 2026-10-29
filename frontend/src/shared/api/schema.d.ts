@@ -28,6 +28,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        InvalidField: {
+            /** @description The request property's path, such as socialLinks[0].url; empty for the whole request */
+            field: string;
+            message: string;
+        };
         /** @description An error, as RFC 9457 Problem Details */
         ProblemDetail: {
             /**
@@ -43,6 +48,8 @@ export interface components {
             instance?: string;
             /** @description The request's trace ID; shown to users as the error's reference */
             traceId: string;
+            /** @description Only for urn:crewup:problem:invalid-request: one entry per invalid field */
+            errors?: components["schemas"]["InvalidField"][];
         };
         UserProfile: {
             /** Format: uuid */

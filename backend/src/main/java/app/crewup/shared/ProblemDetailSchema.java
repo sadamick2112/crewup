@@ -2,6 +2,7 @@ package app.crewup.shared;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.net.URI;
+import java.util.List;
 
 /**
  * Documents the error body every endpoint returns (RFC 9457 Problem Details, API-4), for use in {@code @ApiResponse}.
@@ -21,4 +22,7 @@ public record ProblemDetailSchema(
         @Schema(
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 description = "The request's trace ID; shown to users as the error's reference")
-        String traceId) {}
+        String traceId,
+
+        @Schema(description = "Only for urn:crewup:problem:invalid-request: one entry per invalid field")
+        List<InvalidField> errors) {}

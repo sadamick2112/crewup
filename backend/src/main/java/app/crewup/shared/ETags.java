@@ -11,11 +11,19 @@ public final class ETags {
 
     /** The {@code ETag} header value for a version: a strong ETag, quotes included. */
     public static String of(long version) {
-        throw new UnsupportedOperationException("not implemented");
+        return "\"" + version + "\"";
     }
 
-    /** Passes only when {@code ifMatch} names exactly {@code currentVersion}. */
+    /**
+     * Passes only when {@code ifMatch} names exactly {@code currentVersion}. Anything else, including a weak ETag
+     * ({@code W/"3"}), fails: {@code If-Match} uses strong comparison (RFC 9110, 13.1.1).
+     */
     public static void requireMatch(String ifMatch, long currentVersion) {
-        throw new UnsupportedOperationException("not implemented");
+        if (ifMatch == null) {
+            throw new PreconditionRequiredException();
+        }
+        if (!ifMatch.trim().equals(of(currentVersion))) {
+            throw new PreconditionFailedException();
+        }
     }
 }
