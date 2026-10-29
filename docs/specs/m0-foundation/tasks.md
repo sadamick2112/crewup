@@ -164,7 +164,7 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in the commit 
 - [x] On GitHub: enable Dependabot alerts and security updates; set the code scanning thresholds; protect `main` (require a PR and the checks `backend`, `frontend`, `api-client`, `semgrep`, `gitleaks`, `CodeQL`). *(Done by you in the GitHub UI; I'll give step-by-step instructions.)*
 - [x] Run `/review-standards`, then fix or justify the findings.
 - [x] Open the PR to `main` using the template, and run the plan's Verification steps.
-- [ ] After the merge: Insights → Dependency graph → Dependabot lists the four ecosystems with no config error, and the first update runs start. *(Moved from T15: Dependabot reads its config from the default branch.)*
-- [ ] After the merge: a separate PR from `main` that changes only `coding-standards.md` (standards feedback from the T17 review; the file isn't on `main` until M0 merges). GIT-1: "with requirement IDs **where one applies**" (housekeeping commits have none). GIT-2: the task's checkbox and its project-log entry go in the task's last commit, not a follow-up commit (T13–T15 each had one).
+- [x] After the merge: Insights → Dependency graph → Dependabot lists the four ecosystems with no config error, and the first update runs start. *(Moved from T15: Dependabot reads its config from the default branch.)*
+- [x] After the merge: a separate PR from `main` that changes only `coding-standards.md` (standards feedback from the T17 review; the file isn't on `main` until M0 merges). GIT-1: "with requirement IDs **where one applies**" (housekeeping commits have none). GIT-2: the task's checkbox and its project-log entry go in the task's last commit, not a follow-up commit (T13–T15 each had one).
 
 **Done when:** the PR is green and merged, and M0 is marked done in `roadmap.md` / `requirements.md`.

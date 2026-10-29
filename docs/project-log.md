@@ -4,6 +4,22 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-29 · T17 done: M0 merged, Dependabot tuned (M1 next)
+
+**Decided**
+1. **M0 merged** as PR #1 (merge commit `1ca5b58`). The standards wording from the T17 review merged as PR #4 (GIT-1 "where one applies", GIT-2 "in the task's last commit").
+2. **Dependabot ignores every major the plan §2 version rule holds back**, not only the ones with a technical blocker: `typescript`, `eslint`, `@eslint/js` (ships with ESLint), `@types/node` (follows Node 24 in `.nvmrc`), `vitest`, `@vitest/*`, `msw` and `react-router` (PR #9 and this PR). This reverses T15's decision 3: those major PRs failed CI and would return with every release. **Re-check the holds by hand, with fresh npm download numbers, at the start of each milestone.**
+3. **`vitest` and `@vitest/*` are one Dependabot group**, listed before `minor-and-patch`, because they must share a version.
+4. Merged: #3 (`fast-uri` 3.1.9, a security update fixing 4 alerts) and #11 (`lucide-react` 1.60, the first `minor-and-patch` group PR). Closed with the reason on each: #5–#8, #10 and #12 (Vitest 5, React Router 8, `@types/node` 26, MSW 3).
+
+**Learned**
+- **Dependabot's first run** on `main` succeeded for all four ecosystems. Each Dependabot PR's CI runs like ours and is held by the same ruleset.
+- **Default limit of 5 open version-update PRs per ecosystem.** The first npm run handed over 6 PRs, but only 4 appeared; the rest arrived once others were closed.
+- **Closing a Dependabot PR skips that release of each package in it, also inside a group.** Closing #5 (`@vitest/coverage-v8` 5.0.5) made the later `vitest` group PR (#10) leave it out, so the group couldn't pass CI.
+- **`@dependabot close` did nothing within two minutes**, even on its own line. Closing the PR through the API worked, and Dependabot answered "I won't notify you again about this release".
+- **The yellow warning on `docker-compose.yml` is harmless:** Keycloak's image is on quay.io, where Dependabot can't read publish dates, so the cooldown doesn't apply to it. The `UNAUTHORIZED` line for `library/postgres` in the log is Docker Hub's normal anonymous token step.
+- `gh pr edit` fails with a "Projects (classic) is being deprecated" GraphQL error; update or create PRs through `gh api` (REST) instead.
+
 ## 2026-10-26 · T17: repository settings, review, verification (merge next)
 
 **Decided**
@@ -357,5 +373,6 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Push `main` to GitHub. Delete or rename the old specs copy in `D:\Workspace\Portfolio\CrewUp`.
-2. Write the first feature spec: `docs/specs/m0-foundation/` (see `docs/roadmap.md`, Milestone 0), then plan and build it with Claude Code on a `feat/m0-foundation` branch.
+1. Write the M1 spec in `docs/specs/` (see `docs/roadmap.md`, Milestone 1), then plan and build it on a `feat/` branch.
+2. Early in M1: fix the Surefire 30 s fork-kill delay (T17 entry, 2026-10-26).
+3. At the start of M1: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).

@@ -43,6 +43,17 @@ updates:
       # Node's type definitions follow the Node major in .nvmrc (24), not the newest Node.
       - dependency-name: "@types/node"
         update-types: [version-update:semver-major]
+      # Held only because few projects use the newest major yet (version rule, plan §2). Their major PRs failed CI
+      # and came back with every release, so they're re-checked by hand with fresh download numbers at the start of
+      # each milestone instead.
+      - dependency-name: vitest
+        update-types: [version-update:semver-major]
+      - dependency-name: "@vitest/*"
+        update-types: [version-update:semver-major]
+      - dependency-name: msw
+        update-types: [version-update:semver-major]
+      - dependency-name: react-router
+        update-types: [version-update:semver-major]
 
   # Actions in .github/workflows, pinned by commit SHA; Dependabot updates the SHA and the version comment.
   - package-ecosystem: github-actions
