@@ -12,10 +12,13 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * Full application context against Testcontainers PostgreSQL and the {@link TestOidcProvider}, with MockMvc. Every
  * integration test uses this same annotation so Spring caches one context (and one container) for the whole test run.
+ *
+ * <p>Logs are JSON (as outside local development), so log tests read fields instead of matching text. The setting
+ * lives here, not on a single test class: a second context in the same JVM keeps the first one's logging setup.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@SpringBootTest
+@SpringBootTest(properties = "logging.structured.format.console=ecs")
 @AutoConfigureMockMvc
 @Import({TestcontainersConfiguration.class, ApiProbeController.class})
 @ContextConfiguration(initializers = TestOidcProviderInitializer.class)
