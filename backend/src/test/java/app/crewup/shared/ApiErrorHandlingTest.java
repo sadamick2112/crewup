@@ -50,7 +50,8 @@ class ApiErrorHandlingTest {
                 .bodyJson()
                 .extractingPath("$.errors[*].message")
                 .asArray()
-                .doesNotContain("", null);
+                .doesNotContainNull()
+                .doesNotContain("");
     }
 
     @Test
