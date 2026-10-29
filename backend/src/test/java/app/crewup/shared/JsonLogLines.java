@@ -6,19 +6,25 @@ import java.util.Objects;
 import org.springframework.boot.test.system.CapturedOutput;
 import tools.jackson.databind.json.JsonMapper;
 
-/** Reads captured ECS JSON log output, one event per line. */
-final class JsonLogLines {
+/** Reads captured ECS JSON log output, one event per line. Public, so every module's log tests can use it. */
+public final class JsonLogLines {
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
     private JsonLogLines() {}
 
-    /** The request log lines (those with an {@code http.route} field) in the captured output. */
-    static List<Map<String, Object>> requestLines(CapturedOutput output) {
+    /** Every JSON log event in the captured output. */
+    public static List<Map<String, Object>> events(CapturedOutput output) {
         return output.getOut()
                 .lines()
                 .filter(line -> line.startsWith("{"))
                 .map(JsonLogLines::parse)
+                .toList();
+    }
+
+    /** The request log lines (those with an {@code http.route} field) in the captured output. */
+    static List<Map<String, Object>> requestLines(CapturedOutput output) {
+        return events(output).stream()
                 .filter(event -> field(event, "http.route") != null)
                 .toList();
     }
@@ -33,7 +39,7 @@ final class JsonLogLines {
      * Looks up a field by its dotted name, whether the JSON writes it flat ({@code "http.route": …}) or nested
      * ({@code "http": {"route": …}}), so tests don't depend on that formatting detail.
      */
-    static Object field(Map<String, Object> event, String dottedName) {
+    public static Object field(Map<String, Object> event, String dottedName) {
         if (event.containsKey(dottedName)) {
             return event.get(dottedName);
         }
@@ -47,7 +53,7 @@ final class JsonLogLines {
         return current;
     }
 
-    static String text(Map<String, Object> event, String dottedName) {
+    public static String text(Map<String, Object> event, String dottedName) {
         return Objects.toString(field(event, dottedName), null);
     }
 

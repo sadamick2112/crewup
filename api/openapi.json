@@ -11,6 +11,123 @@
     "bearerAuth" : [ ]
   } ],
   "paths" : {
+    "/api/crews" : {
+      "get" : {
+        "tags" : [ "Crews" ],
+        "summary" : "List the caller's crews",
+        "description" : "Sorted by name, one page at a time.",
+        "operationId" : "myCrews",
+        "parameters" : [ {
+          "name" : "cursor",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 50,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "One page of the caller's crews",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CursorPageCrewSummary"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid cursor or limit",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid access token",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Crews" ],
+        "summary" : "Create a crew",
+        "description" : "The caller becomes its first Member, an Administrator.",
+        "operationId" : "create",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateCrewRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "The new crew",
+            "headers" : {
+              "ETag" : {
+                "description" : "Send back in If-Match to update it",
+                "style" : "simple"
+              },
+              "Location" : {
+                "description" : "The new crew's URL",
+                "style" : "simple"
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CrewDetails"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid fields",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid access token",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/me" : {
       "get" : {
         "tags" : [ "Profile" ],
@@ -40,10 +157,105 @@
           }
         }
       }
+    },
+    "/api/crews/{crewId}" : {
+      "get" : {
+        "tags" : [ "Crews" ],
+        "summary" : "Get a crew",
+        "description" : "With the caller's own Member id and role.",
+        "operationId" : "crew",
+        "parameters" : [ {
+          "name" : "crewId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The crew",
+            "headers" : {
+              "ETag" : {
+                "description" : "Send back in If-Match to update it",
+                "style" : "simple"
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CrewDetails"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No such crew, or the caller isn't a member",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid access token",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components" : {
     "schemas" : {
+      "CreateCrewRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "establishedMonth" : {
+            "type" : "string",
+            "example" : "1999-10",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          },
+          "iconKey" : {
+            "type" : "string",
+            "enum" : [ "USERS", "DICE", "DINING", "FILM", "BEER", "GAMEPAD", "TROPHY", "MUSIC", "MOUNTAIN", "TENT", "PIZZA", "COFFEE" ]
+          },
+          "timeZone" : {
+            "type" : "string",
+            "example" : "America/Chicago",
+            "minLength" : 1
+          },
+          "motto" : {
+            "type" : "string",
+            "maxLength" : 150,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          },
+          "creatorFirstName" : {
+            "type" : "string",
+            "maxLength" : 50,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "creatorFirstName", "establishedMonth", "iconKey", "name", "timeZone" ]
+      },
       "InvalidField" : {
         "type" : "object",
         "properties" : {
@@ -94,6 +306,47 @@
         },
         "required" : [ "status", "title", "traceId" ]
       },
+      "CrewDetails" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "establishedMonth" : {
+            "type" : "string",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          },
+          "motto" : {
+            "type" : [ "string", "null" ]
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "iconKey" : {
+            "type" : "string",
+            "enum" : [ "USERS", "DICE", "DINING", "FILM", "BEER", "GAMEPAD", "TROPHY", "MUSIC", "MOUNTAIN", "TENT", "PIZZA", "COFFEE" ]
+          },
+          "timeZone" : {
+            "type" : "string",
+            "example" : "America/Chicago"
+          },
+          "myMemberId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "The caller's Member id in this crew"
+          },
+          "myRole" : {
+            "type" : "string",
+            "description" : "The caller's role in this crew",
+            "enum" : [ "ADMIN", "FRIEND", "NEW_GUY" ]
+          }
+        },
+        "required" : [ "description", "establishedMonth", "iconKey", "id", "motto", "myMemberId", "myRole", "name", "timeZone" ]
+      },
       "UserProfile" : {
         "type" : "object",
         "properties" : {
@@ -111,6 +364,51 @@
           }
         },
         "required" : [ "displayName", "email", "id" ]
+      },
+      "CrewSummary" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "iconKey" : {
+            "type" : "string",
+            "enum" : [ "USERS", "DICE", "DINING", "FILM", "BEER", "GAMEPAD", "TROPHY", "MUSIC", "MOUNTAIN", "TENT", "PIZZA", "COFFEE" ]
+          },
+          "motto" : {
+            "type" : [ "string", "null" ]
+          },
+          "establishedMonth" : {
+            "type" : "string",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          },
+          "myRole" : {
+            "type" : "string",
+            "description" : "The caller's role in this crew",
+            "enum" : [ "ADMIN", "FRIEND", "NEW_GUY" ]
+          }
+        },
+        "required" : [ "establishedMonth", "iconKey", "id", "motto", "myRole", "name" ]
+      },
+      "CursorPageCrewSummary" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrewSummary"
+            }
+          },
+          "nextCursor" : {
+            "type" : [ "string", "null" ],
+            "description" : "Null on the last page"
+          }
+        },
+        "required" : [ "items", "nextCursor" ]
       }
     },
     "securitySchemes" : {
