@@ -33,13 +33,13 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in its last co
 
 ### T3 · Create, list and view crews 🔴→🟢 [plan §3, §4.2, §4.3, §4.5, §4.6]
 **Red**
-- [ ] `CrewFixtures` test helper (users, crews and members per test, removed afterwards).
-- [ ] Tests from the plan §6 rows M1-1 (API and validator units), M1-2, M1-3, M1-4, M1-16 (`isMember` part: non-member, unknown and deleted crew all `404` with the same body; `M1_16_everyCrewEndpointHasPreAuthorize`), M1-17. Stubs: the DTOs and controller methods that throw. The migration `V20261030100000__crews_create_crews_and_members.sql` is setup and goes in this red commit, so the tests fail on assertions rather than on a missing table.
-- [ ] **Commit:** `test(crews): add failing tests for creating and viewing crews [GRP-1, ACC-2, M1-16, M1-17]`
+- [x] `CrewFixtures` test helper (users, crews and members per test, removed afterwards).
+- [x] Tests from the plan §6 rows M1-1 (API and validator units), M1-2, M1-3, M1-4, M1-16 (`isMember` part: non-member, unknown and deleted crew all `404` with the same body; `M1_16_everyCrewEndpointHasPreAuthorize`), M1-17. Stubs: the DTOs and controller methods that throw. The migration `V20261030100000__crews_create_crews_and_members.sql` is setup and goes in this red commit, so the tests fail on assertions rather than on a missing table.
+- [x] **Commit:** `test(crews): add failing tests for creating and viewing crews [GRP-1, ACC-2, M1-16, M1-17]`
 
 **Green**
-- [ ] `Crew`, `Member` (core fields), repositories, `YearMonthConverter`, `CrewIcon`, `MemberRole`, `MemberStatus`, `CrewService` (create, my crews, view), `CrewController`, the validators, `CrewAccess.isMember`, `CallerMemberships`, `@EnableMethodSecurity`.
-- [ ] If the 404 from `CrewAccess` arrives wrapped by Spring's expression evaluation, unwrap it in `ApiExceptionHandler` and note it in the log entry (plan §4.2).
+- [x] `Crew`, `Member` (core fields), repositories, `YearMonthConverter`, `CrewIcon`, `MemberRole`, `MemberStatus`, `CrewService` (create, my crews, view), `CrewController`, the validators, `CrewAccess.isMember`, `CallerMemberships`, `@EnableMethodSecurity`.
+- [x] If the 404 from `CrewAccess` arrives wrapped by Spring's expression evaluation, unwrap it in `ApiExceptionHandler` and note it in the log entry (plan §4.2). *(Not needed: SpEL rethrows it unwrapped, and the 404 tests pass.)*
 
 **Done when:** tests pass; contract and client updated. **Commit:** `feat(crews): create, list and view crews [GRP-1, ACC-2]`
 

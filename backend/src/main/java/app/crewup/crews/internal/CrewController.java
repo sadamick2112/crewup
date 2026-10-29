@@ -1,7 +1,9 @@
 package app.crewup.crews.internal;
 
+import app.crewup.identity.Users;
 import app.crewup.shared.CursorPage;
 import app.crewup.shared.Cursors;
+import app.crewup.shared.ETags;
 import app.crewup.shared.ProblemDetailSchema;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -12,9 +14,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.net.URI;
 import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +41,16 @@ import org.springframework.web.bind.annotation.RestController;
                         schema = @Schema(implementation = ProblemDetailSchema.class)))
 class CrewController {
 
+    private final CrewService crews;
+    private final Users users;
+    private final CallerMemberships memberships;
+
+    CrewController(CrewService crews, Users users, CallerMemberships memberships) {
+        this.crews = crews;
+        this.users = users;
+        this.memberships = memberships;
+    }
+
     @GetMapping
     @Operation(summary = "List the caller's crews", description = "Sorted by name, one page at a time.")
     @ApiResponse(responseCode = "200", description = "One page of the caller's crews")
@@ -51,7 +65,7 @@ class CrewController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "" + Cursors.DEFAULT_LIMIT) @Min(1) @Max(Cursors.MAX_LIMIT) int limit) {
-        throw new UnsupportedOperationException("not implemented");
+        return crews.myCrews(users.currentUserId(jwt), cursor, limit);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -72,10 +86,14 @@ class CrewController {
                             schema = @Schema(implementation = ProblemDetailSchema.class)))
     ResponseEntity<CrewDetails> create(
             @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateCrewRequest request) {
-        throw new UnsupportedOperationException("not implemented");
+        Versioned<CrewDetails> created = crews.create(users.currentUserId(jwt), request);
+        return ResponseEntity.created(URI.create("/api/crews/" + created.value().id()))
+                .eTag(ETags.of(created.version()))
+                .body(created.value());
     }
 
     @GetMapping("/{crewId}")
+    @PreAuthorize("@crewAccess.isMember(#crewId)")
     @Operation(summary = "Get a crew", description = "With the caller's own Member id and role.")
     @ApiResponse(
             responseCode = "200",
@@ -89,6 +107,7 @@ class CrewController {
                             mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetailSchema.class)))
     ResponseEntity<CrewDetails> crew(@PathVariable UUID crewId) {
-        throw new UnsupportedOperationException("not implemented");
+        Versioned<CrewDetails> crew = crews.crew(crewId, memberships.require(crewId));
+        return ResponseEntity.ok().eTag(ETags.of(crew.version())).body(crew.value());
     }
 }

@@ -4,6 +4,22 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-29 · M1 T3 done: create, list and view crews (T4 next)
+
+**Decided**
+1. **`CrewAccess` (bean `crewAccess`) throws `CrewNotFoundException` for non-members**, and it reaches the client as `404` without unwrapping: SpEL rethrows a runtime exception from the method it calls as is, and Spring Security only catches SpEL's own `EvaluationException`. The plan's fallback (unwrapping in `ApiExceptionHandler`) wasn't needed.
+2. **`CallerMemberships` is request-scoped** and reads the caller from the security context; the controller passes the resulting `Membership` to `CrewService`, which never reads the security context itself (plan §4.2).
+3. **My crews' first page uses a sentinel cursor** (`""` and the nil UUID, which every crew sorts after), so one keyset query serves every page. The sort key `lower(name)` comes from the database, not Java's `toLowerCase`, so cursor and `ORDER BY` always agree.
+4. **`@Version` fields are `Long`, not `long`:** Spring Data treats an entity with a null version as new and persists it; with a primitive it would fall back to the (preassigned) id and merge.
+5. **`M1_16_everyCrewEndpointHasPreAuthorize` reads Spring MVC's `RequestMappingHandlerMapping`**, so it covers every handler under `/api/crews/{crewId}`, in any module, not only `CrewController`. M2's guard test can grow from it.
+6. Small helpers in `crews.internal`: `Text.trimToNull`, `YearMonthConverter` (`autoApply`, month ↔ first day), `Versioned<T>` (a body plus the version for its `ETag`). `JsonLogLines` (test support) is public now, with `events(output)`.
+
+**Learned**
+- **Red:** 24 new tests failed (12 on assertions, 12 on stubs throwing; three of those read the body before the status, so the stub's exception surfaced as MockMvc's "unresolved exception"). The other 56 passed, including the migration on Postgres and the contract with the stub's endpoints. **Green:** 80 tests, JaCoCo 99.7% lines, 87.0% branches; the contract didn't change between red and green.
+- **HQL compares UUIDs with `>`** and supports entity joins without an association (`join Member m on m.crewId = c.id`) and `select new …(c, m.role, lower(c.name))` with an entity argument.
+- `GENERATED ALWAYS AS … STORED` columns (`sort_name`, `sort_last_name`) can stay unmapped: Hibernate's `validate` ignores extra columns and inserts only mapped ones.
+- Spotless rewraps long signatures, so text-based edits to a formatted file must match the formatted text.
+
 ## 2026-10-29 · M1 T2 done: the caller's User id (T3 next)
 
 **Decided**
@@ -422,5 +438,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T3 (create, list and view crews) next.
+1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T4 (edit and delete a crew) next.
 2. At the start of M2: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).

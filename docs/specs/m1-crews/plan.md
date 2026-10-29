@@ -176,7 +176,7 @@ public interface Users {
   - `isMember(crewId)`: true for a member. **Throws `CrewNotFoundException` (404)** for a non-member, a deleted crew or an unknown id, so all three look the same (API-5).
   - `isAdministrator(crewId)`: the same 404 for non-members, otherwise true only for the Administrator role (false → Spring Security's `403`, through M0's `ProblemDetailsAccessDeniedHandler`).
   - `canEditMember(crewId, memberId)`: an Administrator, or the member whose `user_id` is the caller (MEM-3).
-- **Why throw instead of returning false:** `false` always becomes `403`, which would tell a stranger the crew exists. T3's tests prove the exception reaches the client as `404`. If Spring's expression evaluation wraps it, T3 unwraps it in `ApiExceptionHandler` and records that in the log.
+- **Why throw instead of returning false:** `false` always becomes `403`, which would tell a stranger the crew exists. T3's tests prove the exception reaches the client as `404`. If Spring's expression evaluation wraps it, T3 unwraps it in `ApiExceptionHandler` and records that in the log. *(T3: not wrapped. SpEL rethrows a runtime exception from the called method as is, so no unwrapping is needed.)*
 - **`CallerMemberships`** is request-scoped (one instance per HTTP request): it looks up the caller's Member (`id`, `role`) per crew once and reuses it for the access check and the service call.
 - Services take the caller's membership as an argument; they never read the security context themselves.
 

@@ -32,4 +32,18 @@ record CrewDetails(
         UUID myMemberId,
 
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The caller's role in this crew")
-        MemberRole myRole) {}
+        MemberRole myRole) {
+
+    static CrewDetails from(Crew crew, Membership membership) {
+        return new CrewDetails(
+                crew.getId(),
+                crew.getName(),
+                crew.getEstablishedMonth(),
+                crew.getMotto(),
+                crew.getDescription(),
+                crew.getIconKey(),
+                crew.getTimeZone(),
+                membership.memberId(),
+                membership.role());
+    }
+}

@@ -21,4 +21,16 @@ record CrewSummary(
         YearMonth establishedMonth,
 
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The caller's role in this crew")
-        MemberRole myRole) {}
+        MemberRole myRole) {
+
+    static CrewSummary from(CrewOfUser row) {
+        Crew crew = row.crew();
+        return new CrewSummary(
+                crew.getId(),
+                crew.getName(),
+                crew.getIconKey(),
+                crew.getMotto(),
+                crew.getEstablishedMonth(),
+                row.myRole());
+    }
+}
