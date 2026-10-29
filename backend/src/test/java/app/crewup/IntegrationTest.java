@@ -1,5 +1,6 @@
 package app.crewup;
 
+import app.crewup.shared.ApiErrorProbeController;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,6 +21,6 @@ import org.springframework.test.context.ContextConfiguration;
 @Retention(RetentionPolicy.RUNTIME)
 @SpringBootTest(properties = "logging.structured.format.console=ecs")
 @AutoConfigureMockMvc
-@Import({TestcontainersConfiguration.class, ApiProbeController.class})
+@Import({TestcontainersConfiguration.class, ApiProbeController.class, ApiErrorProbeController.class})
 @ContextConfiguration(initializers = TestOidcProviderInitializer.class)
 public @interface IntegrationTest {}
