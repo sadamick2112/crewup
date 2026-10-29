@@ -4,6 +4,16 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-29 · Fix: one JSON-logging context for all integration tests
+
+**Decided**
+1. **`@IntegrationTest` turns on JSON logs (`logging.structured.format.console=ecs`) for every integration test**, instead of `RequestLoggingTest` adding it with `@TestPropertySource`. Changing the committed test was approved (TEST-11); no assertion changed.
+
+**Learned**
+- **Why:** Dependabot PR #14 (Spring Boot 4.1.1 → 4.1.2) failed all 6 `RequestLoggingTest` tests: their context logged plain text, so no JSON request line was found. The extra property gave that class its own (second) context. Logback is set up once per JVM, and up to 4.1.1 the test framework's context *pausing* reset it by accident, so the second context set up JSON afresh. Boot 4.1.2 stopped that reset ([spring-boot#52088](https://github.com/spring-projects/spring-boot/issues/52088)), and the second context kept the first one's plain-text setup. Production runs one context and isn't affected. It passed alone and failed only in the full suite.
+- **Logging settings belong in `@IntegrationTest`, not on one test class**, and any per-class property creates a second context.
+- With one context, Surefire's 30 s "kill self fork JVM" delay (T17 entry, 2026-10-26) no longer appears locally; confirm in CI.
+
 ## 2026-10-29 · T17 done: M0 merged, Dependabot tuned (M1 next)
 
 **Decided**
@@ -374,5 +384,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 ## Next steps
 
 1. Write the M1 spec in `docs/specs/` (see `docs/roadmap.md`, Milestone 1), then plan and build it on a `feat/` branch.
-2. Early in M1: fix the Surefire 30 s fork-kill delay (T17 entry, 2026-10-26).
+2. Early in M1: check that the Surefire 30 s fork-kill delay stays gone in CI; if not, fix it (entries of 2026-10-26 and 2026-10-29).
 3. At the start of M1: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).

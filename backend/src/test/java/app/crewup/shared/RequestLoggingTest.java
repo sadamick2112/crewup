@@ -16,12 +16,10 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
-// JSON logs (as outside local development) so tests read fields instead of matching text.
+// Logs are JSON through @IntegrationTest, so these tests read fields instead of matching text.
 @IntegrationTest
-@TestPropertySource(properties = "logging.structured.format.console=ecs")
 @ExtendWith(OutputCaptureExtension.class)
 class RequestLoggingTest {
 
