@@ -4,6 +4,17 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-29 · M1 T2 done: the caller's User id (T3 next)
+
+**Decided**
+1. **`app.crewup.identity.Users`** is the identity module's first public API: `currentUserId(Jwt)` returns the caller's User id and provisions the User on first use, through the existing `currentUser`, so the provisioning rules stay in one place. Modulith `verify()` accepts it as the module's published interface.
+2. **`currentUserId` carries its own `@Transactional`.** It calls `currentUser` through `this`, which bypasses Spring's proxy, so `currentUser`'s annotation wouldn't apply (and the provisioning insert needs a transaction).
+3. **Draft PR #18** (`feat/m1-crews` → `main`) is open for CI on every push; it's marked ready and merged with a merge commit after T17.
+
+**Learned**
+- **Red:** both new tests failed on the stub; the other 54 passed. **Green:** 56 tests, JaCoCo 99.5% lines, 89.3% branches. No contract change.
+- **"1 configuration not found … /language:java-kotlin" on a PR's "Code scanning results / CodeQL" check is a timing warning,** not a failure. That check compares the PR's analyses with `main`'s as soon as the first one is uploaded. On PR #18 it ran at 23:11:07 with only the JavaScript analysis in; the Java one arrived at 23:12:12 and the check's text then dropped the warning (result: success, 0 alerts). Only worth investigating if the `CodeQL (java-kotlin)` job itself is red or missing.
+
 ## 2026-10-29 · M1 T1 done: shared API plumbing (T2 next)
 
 **Decided**
@@ -411,5 +422,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T2 (the caller's User id) next.
+1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T3 (create, list and view crews) next.
 2. At the start of M2: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).

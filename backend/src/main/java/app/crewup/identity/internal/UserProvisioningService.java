@@ -30,9 +30,11 @@ class UserProvisioningService implements Users {
         return user;
     }
 
+    // Transactional itself: calling currentUser through `this` bypasses the proxy, so its annotation wouldn't apply.
     @Override
+    @Transactional
     public UUID currentUserId(Jwt token) {
-        throw new UnsupportedOperationException("not implemented");
+        return currentUser(token).getId();
     }
 
     private User provision(UserClaims claims) {

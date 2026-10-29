@@ -23,11 +23,11 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in its last co
 
 ### T2 · The caller's User id 🔴→🟢 [plan §4.1]
 **Red**
-- [ ] Tests: `M1_2_currentUserIdProvisionsOnFirstUse`, `M1_2_currentUserIdMatchesGetMe`. Stub: the `Users` interface, with an implementation that throws.
-- [ ] **Commit:** `test(identity): add failing tests for the Users API [M1-2]`
+- [x] Tests: `M1_2_currentUserIdProvisionsOnFirstUse`, `M1_2_currentUserIdMatchesGetMe`. Stub: the `Users` interface, with an implementation that throws.
+- [x] **Commit:** `test(identity): add failing tests for the Users API [M1-2]`
 
 **Green**
-- [ ] `app.crewup.identity.Users`, implemented by `UserProvisioningService`.
+- [x] `app.crewup.identity.Users`, implemented by `UserProvisioningService`.
 
 **Done when:** tests pass, `M0_8_moduleBoundariesAreRespected` still passes. **Commit:** `feat(identity): publish the caller's user id to other modules [M1-2]`
 
