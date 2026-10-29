@@ -4,6 +4,16 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-29 · M1 start: Surefire delay gone in CI, spec approved, "group" renamed "crew"
+
+**Decided**
+1. **M1 spec approved** (`docs/specs/m1-crews/spec.md`), with the decisions in its §7: pictures deferred, real access checks for M1's own rules, no restore and no leave/remove in M1, the app shell and eight screens. Plan and tasks are drafts awaiting approval.
+2. **"Group" is renamed "crew" everywhere** (spec decision 19): screens, API paths (`/api/crews/{crewId}`), the module (`app.crewup.crews`), tables (`crews`, `crew_id`), and the living docs (CLAUDE.md, README, requirements, architecture, roadmap, coding standards, technology guide). Done before any code used the name, so it changed only docs. Requirement IDs keep GRP-*. **Kept as "group":** the "long-running friend groups" tagline, "Friend groups that have met for years" (requirements §1), "Group chat" (a non-goal), "radio group", and shadcn's `input-group`, `radio-group` and `RadioGroup`. **Not changed:** past log entries and the M0 spec, plan and tasks, which record history. The spec folder is now `docs/specs/m1-crews/` and the branch `feat/m1-crews`. The living-docs part merged first as PR #17, on its own because `coding-standards.md` changes go in their own PR.
+
+**Learned**
+- **The Surefire 30 s "kill self fork JVM" delay is gone in CI too.** PR #16's `backend` job log (run 40943543169) has no "kill self fork" line and the Maven build took 29 s; the first `main` run after the Boot 4.1.2 merge (40946111321) also has none, 35 s. Before the fix, `main` run 40546676813 (Oct 27) printed the message and took 1:07 min. The one shared test context (entry below) was the fix; no thread hunt needed.
+- **The README's branch-only gitleaks command scans nothing** when run through Docker: `--log-opts="origin/main..HEAD"` reported "0 commits scanned" (checked on PR #17's branch). With the two commit IDs (`<base>..<head>`) it scanned the commit. Fix the README command when convenient.
+
 ## 2026-10-29 · Fix: one JSON-logging context for all integration tests
 
 **Decided**
@@ -383,6 +393,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Write the M1 spec in `docs/specs/` (see `docs/roadmap.md`, Milestone 1), then plan and build it on a `feat/` branch.
-2. Early in M1: check that the Surefire 30 s fork-kill delay stays gone in CI; if not, fix it (entries of 2026-10-26 and 2026-10-29).
-3. At the start of M1: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).
+1. Approve the M1 plan and tasks (`docs/specs/m1-crews/`), then build M1 task by task on `feat/m1-crews`.
+2. At the start of M1: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).
