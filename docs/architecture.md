@@ -18,7 +18,7 @@ flowchart LR
   M -. later .-> API
   subgraph Backend [Spring Boot modular monolith]
     API[REST API layer]
-    API --> CORE[identity · groups · events]
+    API --> CORE[identity · crews · events]
     API --> DIN[dining]
     API --> BG[boardgames]
     API --> MOV[movies - P2]
@@ -64,7 +64,7 @@ crewup/
 ├── backend/         Spring Boot application (Maven, with the Maven Wrapper)
 │   └── src/main/java/app/crewup/
 │       ├── identity/      users, OIDC mapping
-│       ├── groups/        groups, members, roles, invitations
+│       ├── crews/         crews, members, roles, invitations
 │       ├── events/        events, activities, attendees, the Activity Type SPI
 │       ├── timeline/      search and history read models
 │       ├── dining/        Activity Type module
@@ -76,7 +76,7 @@ crewup/
 ├── frontend/        React app
 │   └── src/
 │       ├── app/           shell, routing, auth
-│       ├── core/          groups, members, events, timeline
+│       ├── core/          crews, members, events, timeline
 │       ├── activity-types/
 │       │   ├── registry.ts
 │       │   ├── dining/
@@ -105,8 +105,8 @@ public interface ActivityTypeProvider {
 Rules:
 
 - `events` discovers providers as Spring beans. It never imports an Activity Type module.
-- Activity Type modules depend on `events` and `groups` public APIs only, **never on each other**. Spring Modulith's `verify()` test enforces this in CI.
-- A module exposes its own REST endpoints under `/api/groups/{groupId}/activities/{activityId}/<type>/…` and its catalog under `/api/groups/{groupId}/<type>/…`.
+- Activity Type modules depend on `events` and `crews` public APIs only, **never on each other**. Spring Modulith's `verify()` test enforces this in CI.
+- A module exposes its own REST endpoints under `/api/crews/{crewId}/activities/{activityId}/<type>/…` and its catalog under `/api/crews/{crewId}/<type>/…`.
 - Cross-module reactions use application events (for example, `ActivityCopied` or `MemberDeactivated`) through Spring Modulith's event publication registry.
 - Each module owns its own tables (prefixed with the module name: `dining_`, `boardgames_`, `movies_`) and its own Flyway migrations folder.
 
@@ -117,8 +117,8 @@ export interface ActivityTypePlugin {
   code: 'DINING' | 'BOARD_GAMING' | string;
   label: string;
   icon: IconComponent;
-  DetailEditor: React.FC<{ activityId: string; groupId: string }>;
-  DetailView: React.FC<{ activityId: string; groupId: string }>;
+  DetailEditor: React.FC<{ activityId: string; crewId: string }>;
+  DetailView: React.FC<{ activityId: string; crewId: string }>;
   routes?: RouteObject[];           // catalog pages, such as /restaurants
   summarize?: (a: ActivityDto) => string;
 }
@@ -133,22 +133,22 @@ Because modules already communicate through a published API and events, a module
 
 ## 5. API design
 
-- REST/JSON. Every group resource sits under `/api/groups/{groupId}/…`, so authorization always has the group in scope.
+- REST/JSON. Every crew resource sits under `/api/crews/{crewId}/…`, so authorization always has the crew in scope.
 - Examples:
-  - `POST /api/groups/{g}/events` · `POST /api/groups/{g}/events/{e}/copy` with `{ startsAt }`
-  - `GET /api/groups/{g}/timeline?type=DINING&member=…&from=…&q=…`
-  - `GET /api/groups/{g}/members?sort=FREQUENT|ALPHA`
-  - `POST /api/groups/{g}/invitations` returns a link and QR payload · `POST /api/invitations/{token}/accept`
-  - `POST /api/groups/{g}/boardgames/lookup` with `{ query }` returns candidates (AI-1)
+  - `POST /api/crews/{c}/events` · `POST /api/crews/{c}/events/{e}/copy` with `{ startsAt }`
+  - `GET /api/crews/{c}/timeline?type=DINING&member=…&from=…&q=…`
+  - `GET /api/crews/{c}/members?sort=FREQUENT|ALPHA`
+  - `POST /api/crews/{c}/invitations` returns a link and QR payload · `POST /api/invitations/{token}/accept`
+  - `POST /api/crews/{c}/boardgames/lookup` with `{ query }` returns candidates (AI-1)
 - Errors follow RFC 9457 Problem Details. Lists use cursor pagination. Concurrent edits use optimistic locking (`ETag`/`If-Match`).
 
 ## 6. Security and authorization
 
 - JWT access tokens from the OIDC provider. The backend maps `sub` to a User.
-- A `GroupAccessEvaluator` resolves the caller's Member and role for `{groupId}` once per request. Method security (`@PreAuthorize("@groupAccess.can(#groupId, 'EVENT_EDIT')")`) checks permissions from the ROL-2 matrix.
+- A `CrewAccessEvaluator` resolves the caller's Member and role for `{crewId}` once per request. Method security (`@PreAuthorize("@crewAccess.can(#crewId, 'EVENT_EDIT')")`) checks permissions from the ROL-2 matrix.
 - "Own only" rules compare `created_by` to the caller's Member.
 - Invitation tokens are random 256-bit values, stored hashed, single use, and expiring.
-- Tests: every endpoint has an authorization test per role, generated from the permission matrix. A guard test fails if any `/api/groups/{groupId}/**` handler lacks `@PreAuthorize`.
+- Tests: every endpoint has an authorization test per role, generated from the permission matrix. A guard test fails if any `/api/crews/{crewId}/**` handler lacks `@PreAuthorize`.
 - CSRF protection is off for `/api/**` because the API is stateless and accepts only bearer tokens (ADR-004). It comes back on if cookie sessions are ever introduced.
 - Static analysis: Semgrep (community and project rules in `.semgrep/`) and CodeQL run in CI. gitleaks scans for secrets, and Dependabot watches dependencies. Suppressions need a written reason. An OWASP ZAP baseline scan runs against the deployed app from M8 on.
 
@@ -161,8 +161,8 @@ Because modules already communicate through a published API and events, a module
   - Where Ollama runs (natively on Windows with GPU access, or as an optional Docker Compose service) is decided in the M7 plan.
   - Budget metering (AI-0d) still counts tokens for a local model, at zero cost, so the code path stays the same.
 - **Tool calling, not free text:** For AI-1, the model receives tools `bgg_search(query)` and `bgg_get(id)`, and returns a typed `BoardGameCandidate[]` (structured output). The user picks, then the backend fetches authoritative fields from BGG directly. The model chooses and summarizes; the source API supplies the facts.
-- **Recommendations (AI-3, AI-7) are hybrid:** A deterministic, unit-tested scoring function ranks candidates (dietary match, cuisine sentiment, group rating, visited recently, open at the planned time). The LLM receives the ranked list and writes the explanations. This is testable, cheap, and explainable, which makes a strong portfolio talking point.
-- **Guardrails:** prompt templates in versioned resources, timeouts, retries with backoff, response caching (for example, BGG data by ID for 30 days), a per-group monthly token budget (NFR-10), and no personal data sent beyond what a feature needs (first names and preferences only, for AI-3).
+- **Recommendations (AI-3, AI-7) are hybrid:** A deterministic, unit-tested scoring function ranks candidates (dietary match, cuisine sentiment, crew rating, visited recently, open at the planned time). The LLM receives the ranked list and writes the explanations. This is testable, cheap, and explainable, which makes a strong portfolio talking point.
+- **Guardrails:** prompt templates in versioned resources, timeouts, retries with backoff, response caching (for example, BGG data by ID for 30 days), a per-crew monthly token budget (NFR-10), and no personal data sent beyond what a feature needs (first names and preferences only, for AI-3).
 - **Evals:** A small fixed set of lookup queries with expected results runs in CI against recorded responses, and against the live API manually.
 - **Cost:** Claude API usage is billed to an Anthropic Console account and is **separate from your Pro subscription**. Set a monthly spend limit there. A local model costs nothing per call.
 
@@ -185,7 +185,7 @@ Because modules already communicate through a published API and events, a module
 | Coverage | JaCoCo, Vitest V8 coverage | Build fails below 80% line / 70% branch coverage |
 | Accessibility | axe-core in component tests, `@axe-core/playwright` end to end | WCAG 2.2 A/AA violations on rendered pages (NFR-4) |
 | Component | React Testing Library + MSW | Forms, attendee picker, registry plug-ins |
-| End to end | Playwright | Golden paths: create group → invite → log dinner → see timeline |
+| End to end | Playwright | Golden paths: create crew → invite → log dinner → see timeline |
 
 Each acceptance criterion in `requirements.md` maps to a test. Test names reference requirement IDs, such as `EVT5_copyShiftsAllActivityTimes`.
 
@@ -199,5 +199,5 @@ Each acceptance criterion in `requirements.md` maps to a test. Test names refere
 | 004 | OIDC provider: Keycloak for development; hosted provider TBD. SPA + PKCE with in-memory tokens, CSRF off for the stateless API ([004-oidc-provider.md](adr/004-oidc-provider.md)) | Accepted (2026-10-23); hosted provider chosen in M8 |
 | 005 | Hosting platform | Open |
 | 006 | AI: Spring AI + Claude by default, local LLM (Ollama) as a configurable alternative; tool calling, hybrid scoring | Proposed |
-| 007 | Per-group catalogs instead of a shared global catalog | Accepted (2026-10-13) |
+| 007 | Per-crew catalogs instead of a shared global catalog | Accepted (2026-10-13) |
 | 008 | External data sources: BGG, places API, TMDB, with license review | Open |

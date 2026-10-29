@@ -69,17 +69,17 @@ These are the rules for all code in CrewUp, whether a person or Claude Code writ
 ## Modules (MOD)
 
 - **MOD-1** Activity Type modules (`dining`, `boardgames`, `movies`) never import each other. *Modulith*
-- **MOD-2** Activity Type modules use only the published APIs of `events` and `groups`, plus application events. *Modulith*
+- **MOD-2** Activity Type modules use only the published APIs of `events` and `crews`, plus application events. *Modulith*
 - **MOD-3** When one module needs to react to something in another, publish an application event (a `record` named in the past tense, such as `ActivityCopied`) instead of calling it directly. *Review*
 - **MOD-4** Each module owns its tables. No module reads or writes another module's tables, even with native SQL. *Review*
 
 ## REST API (API)
 
-- **API-1** Every group resource lives under `/api/groups/{groupId}/…`. *Review*
-- **API-2** Every group endpoint checks permissions with `@PreAuthorize` (from M2, also checked by the guard test). *Review, test*
+- **API-1** Every crew resource lives under `/api/crews/{crewId}/…`. *Review*
+- **API-2** Every crew endpoint checks permissions with `@PreAuthorize` (from M2, also checked by the guard test). *Review, test*
 - **API-3** Paths use plural nouns in kebab-case (`/board-game-sessions`). JSON fields use camelCase. *Review*
 - **API-4** Errors use RFC 9457 Problem Details, with a stable `type` URI per error kind. *Review*
-- **API-5** Status codes: `201` with a `Location` header on create, `204` on delete, `400` invalid input, `401` not signed in, `403` not allowed, `404` not found (also for resources in groups the caller can't see, so they don't leak that it exists), `409`/`412` for edit conflicts. *Review*
+- **API-5** Status codes: `201` with a `Location` header on create, `204` on delete, `400` invalid input, `401` not signed in, `403` not allowed, `404` not found (also for resources in crews the caller can't see, so they don't leak that it exists), `409`/`412` for edit conflicts. *Review*
 - **API-6** Instants are ISO-8601 in UTC (`2026-10-14T18:30:00Z`). An event's time zone is sent separately as an IANA name. *Review*
 - **API-7** Lists use cursor pagination. Updates use optimistic locking (`ETag` / `If-Match`). *Review*
 - **API-8** Every endpoint and DTO is documented in the OpenAPI output (summary, response codes), because the frontend client is generated from it. *Review*

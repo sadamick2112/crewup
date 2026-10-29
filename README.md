@@ -2,7 +2,7 @@
 
 A shared memory log for long-running friend groups: plan get-togethers, log what happened (dinners, board games, movies), and look back on it all. It's a portfolio and learning project: a Spring Boot modular monolith and a React web app, built spec first with Claude Code.
 
-**Status:** Milestone 0 (foundation). You can sign up, sign in, and get greeted by name with data from an authenticated API call. Groups and activities arrive from M1 (see [docs/roadmap.md](docs/roadmap.md)).
+**Status:** Milestone 0 (foundation). You can sign up, sign in, and get greeted by name with data from an authenticated API call. Crews and activities arrive from M1 (see [docs/roadmap.md](docs/roadmap.md)).
 
 New to the stack? The [Technology Guide](docs/technology-guide.md) explains each technology in plain language and what it does in CrewUp.
 
