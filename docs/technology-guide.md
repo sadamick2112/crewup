@@ -77,10 +77,10 @@ The backend and frontend agree on the shape of every request and response throug
 **The problem it solves.** Large applications tend to become a "big ball of mud": any class can call any other class, so a change in one area breaks something unrelated. The usual escape is microservices (many small applications talking over the network), but those add a lot of operational work: separate deployments, network failures, distributed data. A **modular monolith** sits in between. It's one application, one deployment and one database, but with firm internal walls.
 
 **What it does in CrewUp.**
-- Each area of the app is a module: `identity`, `groups`, `events`, and one per Activity Type (`dining`, `boardgames`, `movies`).
+- Each area of the app is a module: `identity`, `crews`, `events`, and one per Activity Type (`dining`, `boardgames`, `movies`).
 - A module exposes a small public API. Everything else lives in an `internal` package that other modules can't use.
 - A test calls Spring Modulith's `verify()`, which fails the build if, for example, the `dining` module imports something from `boardgames`. The architecture rule "Activity Types never depend on each other" is checked automatically, not just written down.
-- Modules can react to each other through **application events**. For example, when a member is deactivated, other modules can respond without the `groups` module needing to know about them.
+- Modules can react to each other through **application events**. For example, when a member is deactivated, other modules can respond without the `crews` module needing to know about them.
 
 **Why.** It keeps the code base easy to change as Activity Types are added, without the cost of microservices (ADR-001).
 
@@ -88,7 +88,7 @@ The backend and frontend agree on the shape of every request and response throug
 
 **What it is.** A free, open-source **relational database**, one of the most capable and widely used. Data is stored in tables with rows and columns, linked by keys, and queried with SQL.
 
-**What it does in CrewUp.** It stores everything: users, groups, members, events, activities, reviews, game results. CrewUp also uses some of its extra features:
+**What it does in CrewUp.** It stores everything: users, crews, members, events, activities, reviews, game results. CrewUp also uses some of its extra features:
 - **full-text search** for searching the timeline (M6)
 - **JSONB** columns and arrays where a fixed table structure doesn't fit
 - `timestamptz` columns, which store exact moments in time (see [Conventions](#conventions))
@@ -151,7 +151,7 @@ The generated client is never edited by hand. It's regenerated.
 
 **What it is.** Spring's framework for authentication (who are you?) and authorization (what are you allowed to do?).
 
-**What it does in CrewUp.** The backend is configured as an **OAuth2 resource server**: it accepts requests only with a valid JWT access token, and answers anything else with `401 Unauthorized`. From M2, **method security** checks group permissions on each endpoint, for example `@PreAuthorize("@groupAccess.can(#groupId, 'EVENT_EDIT')")`, based on the member's role in that group.
+**What it does in CrewUp.** The backend is configured as an **OAuth2 resource server**: it accepts requests only with a valid JWT access token, and answers anything else with `401 Unauthorized`. From M2, **method security** checks crew permissions on each endpoint, for example `@PreAuthorize("@crewAccess.can(#crewId, 'EVENT_EDIT')")`, based on the member's role in that crew.
 
 **Why.** It's the standard, heavily reviewed way to secure a Spring application. Rolling your own security is a classic source of vulnerabilities.
 
@@ -200,12 +200,12 @@ A stolen authorization code is useless without the verifier, which never left th
 ### OWASP
 
 **What it is.** The **Open Worldwide Application Security Project**, a non-profit that publishes free, widely used security guidance and tools. Its best-known publication is the **OWASP Top 10**, a regularly updated list of the most critical web application security risks, such as:
-- **Broken access control:** users reaching data they shouldn't (for example, a member of one group reading another group's events)
+- **Broken access control:** users reaching data they shouldn't (for example, a member of one crew reading another crew's events)
 - **Injection:** untrusted input changing the meaning of a database query or command (SQL injection)
 - **Security misconfiguration**, **vulnerable dependencies**, **authentication failures**, and more
 
 **What it does in CrewUp.** Requirement NFR-2 says the OWASP Top 10 is addressed. In practice:
-- Group-scoped authorization is checked on every request, and tested per role.
+- Crew-scoped authorization is checked on every request, and tested per role.
 - The CI static analysis rules include OWASP Top 10 rule sets.
 - From M8, **OWASP ZAP** (a free security scanner from the same community) runs a baseline scan against the deployed app, checking things like security headers and cookie settings.
 
@@ -288,11 +288,11 @@ AI features arrive in M7. The first one looks up board game details. Under the p
 
 **What it is.** The standard library for **routing** in React: matching the URL in the address bar to the screen to show.
 
-**What it does in CrewUp.** It maps URLs such as `/groups/{groupId}/events/{eventId}` to pages, so pages can be bookmarked and shared, and the browser's back button works as expected, even though the app is a single page.
+**What it does in CrewUp.** It maps URLs such as `/crews/{crewId}/events/{eventId}` to pages, so pages can be bookmarked and shared, and the browser's back button works as expected, even though the app is a single page.
 
 ### TanStack Query
 
-**What it is.** A library for fetching, caching and updating **server state** in a React app. Server state is data that lives on the backend, such as a group's events, as opposed to UI state such as "is this menu open". It was formerly called React Query.
+**What it is.** A library for fetching, caching and updating **server state** in a React app. Server state is data that lives on the backend, such as a crew's events, as opposed to UI state such as "is this menu open". It was formerly called React Query.
 
 **The problem it solves.** Fetching data by hand means writing the same code over and over: loading spinners, error handling, caching, retries, refetching when data goes stale, and keeping several screens in sync after a change.
 
@@ -378,7 +378,7 @@ CrewUp tests at several levels, from small and fast to broad and slow. Test name
 
 **What it is.** A tool from Microsoft for **end-to-end testing**. It drives real browsers (Chromium, Firefox, WebKit) the way a person would: opening pages, clicking buttons, filling in forms, and checking what appears.
 
-**What it does in CrewUp.** Playwright tests cover complete user journeys across every part of the system at once: the browser, the SPA, Keycloak, the backend and the database. The first one (M0) signs in through Keycloak and checks that the home page greets the user. Later ones cover golden paths such as "create a group → invite a friend → log a dinner → see it on the timeline". They run locally in M0 and join CI in M8.
+**What it does in CrewUp.** Playwright tests cover complete user journeys across every part of the system at once: the browser, the SPA, Keycloak, the backend and the database. The first one (M0) signs in through Keycloak and checks that the home page greets the user. Later ones cover golden paths such as "create a crew → invite a friend → log a dinner → see it on the timeline". They run locally in M0 and join CI in M8.
 
 **Why.** Unit and component tests check pieces in isolation. Only an end-to-end test proves the pieces actually work together.
 
@@ -447,7 +447,7 @@ These are small project-wide decisions that show up throughout the code.
 - **UUID v7 IDs.** Every record's ID is a UUID: a 128-bit random-looking value such as `0192f1e4-7c3a-7b2e-9f4d-3a1b2c4d5e6f`. Unlike sequential numbers (1, 2, 3…), UUIDs don't reveal how many records exist and can't be guessed by counting. **Version 7** UUIDs start with a timestamp, so new IDs sort in creation order, which keeps database indexes efficient.
 - **Times stored as `timestamptz`, with the time zone on the Event.** Every moment is stored as an exact instant. Each Event also stores its **IANA time zone** name (such as `America/Chicago`), so "dinner at 7 pm" still displays as 7 pm local time when friends are in different zones or daylight saving time changes.
 - **RFC 9457 Problem Details for errors.** Every API error has the same standard JSON shape (`type`, `title`, `status`, `detail`), so the frontend handles all errors one way.
-- **Group-scoped URLs.** Every group's data lives under `/api/groups/{groupId}/…`, and every endpoint checks the caller's role in that group.
+- **Crew-scoped URLs.** Every crew's data lives under `/api/crews/{crewId}/…`, and every endpoint checks the caller's role in that crew.
 - **Optimistic locking with `ETag` / `If-Match`.** If two people edit the same event at once, the second save is rejected instead of silently overwriting the first person's changes.
 - **Conventional Commits.** Commit messages follow a standard format, such as `feat(dining): add restaurant reviews [DIN-3]`, so the history is easy to scan and every change links to its requirement.
 

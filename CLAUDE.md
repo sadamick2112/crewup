@@ -13,8 +13,8 @@ A shared memory log for long-running friend groups: plan get-togethers, log acti
 ## Principles (the project's constitution)
 
 1. **Spec first.** Don't implement anything without a spec and an approved plan. If the spec is ambiguous, ask instead of guessing.
-2. **Module boundaries are law.** Activity Type modules (`dining`, `boardgames`, `movies`) never import each other. They use only the published APIs of `events` and `groups`, plus application events.
-3. **Group-scoped everything.** Every group resource is under `/api/groups/{groupId}`, and every endpoint checks group permissions.
+2. **Module boundaries are law.** Activity Type modules (`dining`, `boardgames`, `movies`) never import each other. They use only the published APIs of `events` and `crews`, plus application events.
+3. **Crew-scoped everything.** Every crew resource is under `/api/crews/{crewId}`, and every endpoint checks crew permissions.
 4. **AI proposes, the user confirms.** AI never writes data without confirmation, and every AI feature has a manual fallback.
 5. **Test first for logic and APIs.** For domain rules, endpoints, and bug fixes: write tests from the acceptance criteria, run them to confirm they fail, commit, then implement. Never modify a committed test to make it pass; ask instead. Setup, configuration, and visual styling are exempt. Test names reference requirement IDs.
 6. **Small steps.** One task from `tasks.md` at a time. Test-first tasks: failing tests → commit → implement until green → commit. Exempt tasks: implement, test, commit.
