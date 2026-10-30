@@ -1,5 +1,6 @@
 package app.crewup.identity.internal;
 
+import app.crewup.identity.Users;
 import app.crewup.shared.Ids;
 import java.time.Instant;
 import java.util.UUID;
@@ -11,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Finds the User behind an access token, creating it on the first call (M0-6). */
 @Service
-class UserProvisioningService {
+class UserProvisioningService implements Users {
 
     private static final Logger log = LoggerFactory.getLogger(UserProvisioningService.class);
 
@@ -27,6 +28,13 @@ class UserProvisioningService {
         User user = users.findBySubject(claims.subject()).orElseGet(() -> provision(claims));
         user.refresh(claims, Instant.now());
         return user;
+    }
+
+    // Transactional itself: calling currentUser through `this` bypasses the proxy, so its annotation wouldn't apply.
+    @Override
+    @Transactional
+    public UUID currentUserId(Jwt token) {
+        return currentUser(token).getId();
     }
 
     private User provision(UserClaims claims) {

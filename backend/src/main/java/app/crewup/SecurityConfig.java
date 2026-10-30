@@ -3,6 +3,7 @@ package app.crewup;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -10,9 +11,11 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * The API is a stateless OAuth2 resource server (M0-4): {@code /api/**} needs a valid access token from the issuer in
  * {@code .env}, health and the OpenAPI docs are public, and everything else is denied. Token checks (signature, issuer,
- * expiry, audience) come from {@code spring.security.oauth2.resourceserver.jwt} in application.yml.
+ * expiry, audience) come from {@code spring.security.oauth2.resourceserver.jwt} in application.yml. Method security
+ * turns on {@code @PreAuthorize}, which checks crew permissions on each crew endpoint (M1-16).
  */
 @Configuration
+@EnableMethodSecurity
 class SecurityConfig {
 
     @Bean

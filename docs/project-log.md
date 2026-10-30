@@ -4,6 +4,86 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-30 · M1 T5 done: permanent deletion after 30 days (T6 next)
+
+**Decided**
+1. **`CrewPurgeJob.purge()` runs one JPQL bulk delete** (`delete from Crew c where c.deletedAt < :cutoff`), with the cutoff 30 days before now. A bulk delete skips JPA cascades, so members go through the database's `on delete cascade` (plan §3); the test checks that they do.
+2. **`@EnableScheduling` is on `SchedulingConfig`** in `app.crewup`, next to `SecurityConfig`. The cron is `0 30 3 * * *` in UTC. The job logs `Deleted crews purged` with `count` on every run, including 0, so its runs show up in the logs.
+
+**Learned**
+- **Red:** the "keeps recently deleted crews" test passed against the do-nothing stub; it guards against deleting too much, so only a wrong job can break it. The "older than 30 days" test failed. **Green:** 103 tests, JaCoCo 99.7% lines, 90.7% branches.
+- **Running Semgrep before committing paid off at once:** `sql-string-concat` flagged a test helper that built `SELECT count(*) FROM " + table`, even with a constant table name. Two fixed queries replaced it.
+
+## 2026-10-30 · M1 T4 done: edit and delete a crew (T5 next)
+
+**Decided**
+1. **`isAdministrator` returns `false` (→ `403`) for a Friend or New Guy**, but still throws the `404` for non-members through `CallerMemberships.require`, so `@PreAuthorize` keeps API-5's "a stranger can't tell" rule.
+2. **The `If-Match` header is optional to Spring and required in OpenAPI.** If Spring required it, a missing header would get Spring's `400`; optional, it reaches `ETags.requireMatch` and gets `428` (M1-5), while the generated client still has to send it.
+3. **`CrewService.update` flushes before answering**, so Hibernate bumps `@Version` inside the request and the response's `ETag` is the one the next update needs.
+4. **Delete confirmation:** `confirmName` is trimmed and then compared exactly (case counts), as M1-6 says; a mismatch is `400 urn:crewup:problem:confirmation-mismatch`. Update and delete log `crewId` and the acting `memberId`, as create does.
+5. **T4's tests are in a new class, `CrewEditDeleteTest`,** including the `404` cases of M1-16 for the new endpoints, so the committed `CrewAccessTest` stayed unchanged. A test-only red commit was enough: without the endpoints, every new test got `405`.
+
+**Learned**
+- **CI's Semgrep caught a `java.sql.Timestamp` cast in T3's M1-17 test** (JAVA-9, `no-legacy-date-types`). Fixed with approval in its own commit (`8eb25ee`): it reads `created_at` as `OffsetDateTime`, which pgjdbc supports, and converts it to `Instant`. **Semgrep now runs locally before every commit**, alongside `verify`.
+- **Red:** 15 new tests failed, all with `405`. **Green:** 95 tests, JaCoCo 99.7% lines, 90.0% branches; Semgrep 0 findings.
+- **CodeQL raised a high alert, `java/tainted-arithmetic` (CWE-190), on `Limit.of(limit + 1)` in `CrewService`.** It was unreachable, since the controller's `@Min(1) @Max(100)` returns `400` first, but CodeQL doesn't read Bean Validation. Fixed in code rather than dismissed, because every list would raise it again: `Cursors.fetchLimit(limit)` checks the range itself (same `400` on `limit`) and returns the `limit + 1` fetch size. Every paged service uses it from now on (red `456b21d`, then green).
+- The VS Code Modulith plugin flags `shared` types as "non-exposed", but `shared` is an OPEN module; the build's `verify()` is the authority and passes.
+
+## 2026-10-29 · M1 T3 done: create, list and view crews (T4 next)
+
+**Decided**
+1. **`CrewAccess` (bean `crewAccess`) throws `CrewNotFoundException` for non-members**, and it reaches the client as `404` without unwrapping: SpEL rethrows a runtime exception from the method it calls as is, and Spring Security only catches SpEL's own `EvaluationException`. The plan's fallback (unwrapping in `ApiExceptionHandler`) wasn't needed.
+2. **`CallerMemberships` is request-scoped** and reads the caller from the security context; the controller passes the resulting `Membership` to `CrewService`, which never reads the security context itself (plan §4.2).
+3. **My crews' first page uses a sentinel cursor** (`""` and the nil UUID, which every crew sorts after), so one keyset query serves every page. The sort key `lower(name)` comes from the database, not Java's `toLowerCase`, so cursor and `ORDER BY` always agree.
+4. **`@Version` fields are `Long`, not `long`:** Spring Data treats an entity with a null version as new and persists it; with a primitive it would fall back to the (preassigned) id and merge.
+5. **`M1_16_everyCrewEndpointHasPreAuthorize` reads Spring MVC's `RequestMappingHandlerMapping`**, so it covers every handler under `/api/crews/{crewId}`, in any module, not only `CrewController`. M2's guard test can grow from it.
+6. Small helpers in `crews.internal`: `Text.trimToNull`, `YearMonthConverter` (`autoApply`, month ↔ first day), `Versioned<T>` (a body plus the version for its `ETag`). `JsonLogLines` (test support) is public now, with `events(output)`.
+
+**Learned**
+- **Red:** 24 new tests failed (12 on assertions, 12 on stubs throwing; three of those read the body before the status, so the stub's exception surfaced as MockMvc's "unresolved exception"). The other 56 passed, including the migration on Postgres and the contract with the stub's endpoints. **Green:** 80 tests, JaCoCo 99.7% lines, 87.0% branches; the contract didn't change between red and green.
+- **HQL compares UUIDs with `>`** and supports entity joins without an association (`join Member m on m.crewId = c.id`) and `select new …(c, m.role, lower(c.name))` with an entity argument.
+- `GENERATED ALWAYS AS … STORED` columns (`sort_name`, `sort_last_name`) can stay unmapped: Hibernate's `validate` ignores extra columns and inserts only mapped ones.
+- Spotless rewraps long signatures, so text-based edits to a formatted file must match the formatted text.
+
+## 2026-10-29 · M1 T2 done: the caller's User id (T3 next)
+
+**Decided**
+1. **`app.crewup.identity.Users`** is the identity module's first public API: `currentUserId(Jwt)` returns the caller's User id and provisions the User on first use, through the existing `currentUser`, so the provisioning rules stay in one place. Modulith `verify()` accepts it as the module's published interface.
+2. **`currentUserId` carries its own `@Transactional`.** It calls `currentUser` through `this`, which bypasses Spring's proxy, so `currentUser`'s annotation wouldn't apply (and the provisioning insert needs a transaction).
+3. **Draft PR #18** (`feat/m1-crews` → `main`) is open for CI on every push; it's marked ready and merged with a merge commit after T17.
+
+**Learned**
+- **Red:** both new tests failed on the stub; the other 54 passed. **Green:** 56 tests, JaCoCo 99.5% lines, 89.3% branches. No contract change.
+- **"1 configuration not found … /language:java-kotlin" on a PR's "Code scanning results / CodeQL" check is a timing warning,** not a failure. That check compares the PR's analyses with `main`'s as soon as the first one is uploaded. On PR #18 it ran at 23:11:07 with only the JavaScript analysis in; the Java one arrived at 23:12:12 and the check's text then dropped the warning (result: success, 0 alerts). Only worth investigating if the `CodeQL (java-kotlin)` job itself is red or missing.
+
+## 2026-10-29 · M1 T1 done: shared API plumbing (T2 next)
+
+**Decided**
+1. **`ETags.requireMatch(ifMatch, currentVersion)`** replaces plan §4.4's `expectedVersion(...)` plus a comparison in each service: one call, which throws `428` (missing) or `412` (anything else, including a weak `W/"3"`, since `If-Match` compares strongly).
+2. **`ApiExceptionHandler` extends `ResponseEntityExceptionHandler`** and overrides only `handleMethodArgumentNotValid` and `handleHandlerMethodValidationException`. Spring's built-in errors (an unknown path's 404) keep their Problem Details, and Boot's `ProblemDetailsExceptionHandler` steps aside (it backs off when another `ResponseEntityExceptionHandler` exists), so no two advices compete for the same exception.
+3. **A committed test was corrected, with approval (TEST-11):** `doesNotContain("", null)` in `M1_1_invalidRequestReturns400WithFieldPaths` resolved to AssertJ's `doesNotContain(value, Index)` overload and threw. Commit `8530ed6` uses `doesNotContainNull().doesNotContain("")`.
+4. `ProblemDetailSchema` documents an optional `errors` array (`InvalidField`: `field`, `message`), so the contract and generated client have it for M1-22.
+
+**Learned**
+- **Red:** 22 new tests failed (18 on assertions, 4 on stubs throwing "not implemented"); the other 35 passed. **Green:** 54 tests, JaCoCo 99.5% lines, 89.3% branches.
+- **Probe controllers join `@IntegrationTest`'s `@Import`**, so they share the one cached context (2026-10-29 entry). `ApiErrorProbeController` is public because `IntegrationTest` lives in `app.crewup`.
+- `@Valid @RequestBody` errors arrive as `MethodArgumentNotValidException` with paths such as `links[0].url`; constraints on query parameters (`@Max` on `limit`) arrive as `HandlerMethodValidationException`, with no `@Validated` needed on the controller (Spring 6.1+).
+- A cursor that decodes to JSON `null` is treated as the first page rather than refused: harmless, and it avoids a branch no client can reach.
+- `getContentAsString()` on a MockMvc response throws a checked exception, so a test that reads the body declares `throws Exception`.
+
+## 2026-10-29 · M1 start: Surefire delay gone in CI, spec approved, "group" renamed "crew"
+
+**Decided**
+1. **M1 spec approved** (`docs/specs/m1-crews/spec.md`), with the decisions in its §7: pictures deferred, real access checks for M1's own rules, no restore and no leave/remove in M1, the app shell and eight screens. 
+2. **"Group" is renamed "crew" everywhere** (spec decision 19): screens, API paths (`/api/crews/{crewId}`), the module (`app.crewup.crews`), tables (`crews`, `crew_id`), and the living docs (CLAUDE.md, README, requirements, architecture, roadmap, coding standards, technology guide). Done before any code used the name, so it changed only docs. Requirement IDs keep GRP-*. **Kept as "group":** the "long-running friend groups" tagline, "Friend groups that have met for years" (requirements §1), "Group chat" (a non-goal), "radio group", and shadcn's `input-group`, `radio-group` and `RadioGroup`. **Not changed:** past log entries and the M0 spec, plan and tasks, which record history. The spec folder is now `docs/specs/m1-crews/` and the branch `feat/m1-crews`. The living-docs part merged first as PR #17, on its own because `coding-standards.md` changes go in their own PR.
+3. **M1 plan and tasks approved**, including plan §5.6: the M0 home page tests render through the app's routes, get a `GET /api/crews` handler, and open the user menu before "Sign out" (TEST-11, names and assertions unchanged, own `test:` commit before T9).
+4. **All eight Dependabot major-version holds stay** (milestone re-check, T17 entry). Last week's npm downloads by major: `typescript` 5: 59%, 6: 20%, 7: 14% (`typescript-eslint` 8.72.1 still allows `<6.1.0`, `openapi-typescript` 7.13.0 needs `^5.x`); `eslint` 9: 53%, 10: 23% (`eslint-plugin-jsx-a11y` 6.10.2 still declares ESLint ≤ 9, issue #1075 open); `@eslint/js` follows ESLint; `@types/node` follows Node 24 (Node 26 became LTS on 2026-10-28; Node 24 is in maintenance until 2028-04-30, so no move yet); `vitest` 4: 47% vs 5: 28%; `msw` 2: 86% vs 3: 8%; `react-router` 7: 45% vs 8: 12%. Re-check at the start of M2.
+5. **The README's gitleaks command is fixed in M1's T16**, not in a separate PR.
+
+**Learned**
+- **The Surefire 30 s "kill self fork JVM" delay is gone in CI too.** PR #16's `backend` job log (run 40943543169) has no "kill self fork" line and the Maven build took 29 s; the first `main` run after the Boot 4.1.2 merge (40946111321) also has none, 35 s. Before the fix, `main` run 40546676813 (Oct 27) printed the message and took 1:07 min. The one shared test context (entry below) was the fix; no thread hunt needed.
+- **The README's branch-only gitleaks command scans nothing** when run through Docker: `--log-opts="origin/main..HEAD"` reported "0 commits scanned" (checked on PR #17's branch). With the two commit IDs (`<base>..<head>`) it scanned the commit. Fix the README command when convenient.
+
 ## 2026-10-29 · Fix: one JSON-logging context for all integration tests
 
 **Decided**
@@ -383,6 +463,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Write the M1 spec in `docs/specs/` (see `docs/roadmap.md`, Milestone 1), then plan and build it on a `feat/` branch.
-2. Early in M1: check that the Surefire 30 s fork-kill delay stays gone in CI; if not, fix it (entries of 2026-10-26 and 2026-10-29).
-3. At the start of M1: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).
+1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T6 (add, list and view members) next.
+2. At the start of M2: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).
