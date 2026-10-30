@@ -55,11 +55,11 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in its last co
 
 ### T5 · Permanent deletion after 30 days 🔴→🟢 [plan §4.6]
 **Red**
-- [ ] Tests: `M1_7_GRP3_purgeDeletesCrewsOlderThan30DaysWithMembers`, `M1_7_GRP3_purgeKeepsRecentlyDeletedCrews` (calling the job's method directly, with `deleted_at` set through JDBC). Stub job that does nothing.
-- [ ] **Commit:** `test(crews): add failing tests for purging deleted crews [GRP-3]`
+- [x] Tests: `M1_7_GRP3_purgeDeletesCrewsOlderThan30DaysWithMembers`, `M1_7_GRP3_purgeKeepsRecentlyDeletedCrews` (calling the job's method directly, with `deleted_at` set through JDBC). Stub job that does nothing.
+- [x] **Commit:** `test(crews): add failing tests for purging deleted crews [GRP-3]`
 
 **Green**
-- [ ] `CrewPurgeJob`, scheduling config, `Deleted crews purged` log line.
+- [x] `CrewPurgeJob`, scheduling config, `Deleted crews purged` log line.
 
 **Done when:** tests pass. **Commit:** `feat(crews): purge crews 30 days after deletion [GRP-3]`
 

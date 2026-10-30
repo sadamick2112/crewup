@@ -4,6 +4,16 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-30 · M1 T5 done: permanent deletion after 30 days (T6 next)
+
+**Decided**
+1. **`CrewPurgeJob.purge()` runs one JPQL bulk delete** (`delete from Crew c where c.deletedAt < :cutoff`), with the cutoff 30 days before now. A bulk delete skips JPA cascades, so members go through the database's `on delete cascade` (plan §3); the test checks that they do.
+2. **`@EnableScheduling` is on `SchedulingConfig`** in `app.crewup`, next to `SecurityConfig`. The cron is `0 30 3 * * *` in UTC. The job logs `Deleted crews purged` with `count` on every run, including 0, so its runs show up in the logs.
+
+**Learned**
+- **Red:** the "keeps recently deleted crews" test passed against the do-nothing stub; it guards against deleting too much, so only a wrong job can break it. The "older than 30 days" test failed. **Green:** 103 tests, JaCoCo 99.7% lines, 90.7% branches.
+- **Running Semgrep before committing paid off at once:** `sql-string-concat` flagged a test helper that built `SELECT count(*) FROM " + table`, even with a constant table name. Two fixed queries replaced it.
+
 ## 2026-10-30 · M1 T4 done: edit and delete a crew (T5 next)
 
 **Decided**
@@ -453,5 +463,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T5 (permanent deletion after 30 days) next.
+1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T6 (add, list and view members) next.
 2. At the start of M2: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).

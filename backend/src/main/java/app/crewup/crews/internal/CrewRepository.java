@@ -1,9 +1,11 @@
 package app.crewup.crews.internal;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 interface CrewRepository extends JpaRepository<Crew, UUID> {
@@ -20,4 +22,9 @@ interface CrewRepository extends JpaRepository<Crew, UUID> {
             order by lower(c.name), c.id
             """)
     List<CrewOfUser> findCrewsOfUser(UUID userId, String afterName, UUID afterId, Limit limit);
+
+    /** Erases crews deleted before {@code cutoff}; the database cascades to their members (M1-7). */
+    @Modifying
+    @Query("delete from Crew c where c.deletedAt < :cutoff")
+    int deleteDeletedBefore(Instant cutoff);
 }
