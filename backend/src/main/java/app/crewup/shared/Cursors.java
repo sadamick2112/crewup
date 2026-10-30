@@ -4,6 +4,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
@@ -35,6 +36,11 @@ public class Cursors {
             // Not Base64, or not this list's key: a cursor the client made up or copied from another list.
             throw new InvalidRequestException("cursor", "Not a cursor from this list");
         }
+    }
+
+    /** Stub until the next commit. */
+    public Limit fetchLimit(int limit) {
+        return Limit.unlimited();
     }
 
     /**
