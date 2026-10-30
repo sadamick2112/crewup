@@ -7,6 +7,7 @@ import app.crewup.crews.internal.CrewFixtures.TestUser;
 import app.crewup.shared.JsonLogLines;
 import com.jayway.jsonpath.JsonPath;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -232,7 +233,11 @@ class CrewEndpointsTest {
         }) {
             Map<String, Object> row = jdbc.queryForMap(sql, crewId);
             assertThat(row).containsEntry("created_by", user.id()).containsEntry("updated_by", user.id());
-            assertThat(((java.sql.Timestamp) row.get("created_at")).toInstant()).isBetween(before, after);
+            Instant createdAt = jdbc.query(
+                            sql, (rs, rowNum) -> rs.getObject("created_at", OffsetDateTime.class), crewId)
+                    .getFirst()
+                    .toInstant();
+            assertThat(createdAt).isBetween(before, after);
             assertThat(row.get("updated_at")).isEqualTo(row.get("created_at"));
         }
     }
