@@ -2,6 +2,7 @@ package app.crewup.crews.internal;
 
 import app.crewup.shared.CursorPage;
 import app.crewup.shared.Cursors;
+import app.crewup.shared.ETags;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -59,5 +60,35 @@ class CrewService {
     Versioned<CrewDetails> crew(UUID crewId, Membership membership) {
         Crew crew = crews.findById(crewId).orElseThrow(CrewNotFoundException::new);
         return new Versioned<>(CrewDetails.from(crew, membership), crew.getVersion());
+    }
+
+    /** Saves every field if {@code ifMatch} carries the current version (M1-5, API-7). */
+    @Transactional
+    Versioned<CrewDetails> update(
+            UUID crewId, Membership membership, UUID userId, String ifMatch, UpdateCrewRequest request) {
+        Crew crew = crews.findById(crewId).orElseThrow(CrewNotFoundException::new);
+        ETags.requireMatch(ifMatch, crew.getVersion());
+        crew.update(request, userId, Instant.now());
+        // Flushing now bumps the version, so the response's ETag is the one the next update must send.
+        crews.flush();
+        log.atInfo()
+                .addKeyValue("crewId", crewId)
+                .addKeyValue("memberId", membership.memberId())
+                .log("Crew updated");
+        return new Versioned<>(CrewDetails.from(crew, membership), crew.getVersion());
+    }
+
+    /** Soft-deletes the crew if {@code confirmName} is its name, ignoring surrounding spaces (M1-6). */
+    @Transactional
+    void delete(UUID crewId, Membership membership, UUID userId, String confirmName) {
+        Crew crew = crews.findById(crewId).orElseThrow(CrewNotFoundException::new);
+        if (!crew.getName().equals(confirmName.trim())) {
+            throw new ConfirmationMismatchException();
+        }
+        crew.delete(userId, Instant.now());
+        log.atInfo()
+                .addKeyValue("crewId", crewId)
+                .addKeyValue("memberId", membership.memberId())
+                .log("Crew deleted");
     }
 }

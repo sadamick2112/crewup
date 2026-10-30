@@ -4,6 +4,20 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ---
 
+## 2026-10-30 · M1 T4 done: edit and delete a crew (T5 next)
+
+**Decided**
+1. **`isAdministrator` returns `false` (→ `403`) for a Friend or New Guy**, but still throws the `404` for non-members through `CallerMemberships.require`, so `@PreAuthorize` keeps API-5's "a stranger can't tell" rule.
+2. **The `If-Match` header is optional to Spring and required in OpenAPI.** If Spring required it, a missing header would get Spring's `400`; optional, it reaches `ETags.requireMatch` and gets `428` (M1-5), while the generated client still has to send it.
+3. **`CrewService.update` flushes before answering**, so Hibernate bumps `@Version` inside the request and the response's `ETag` is the one the next update needs.
+4. **Delete confirmation:** `confirmName` is trimmed and then compared exactly (case counts), as M1-6 says; a mismatch is `400 urn:crewup:problem:confirmation-mismatch`. Update and delete log `crewId` and the acting `memberId`, as create does.
+5. **T4's tests are in a new class, `CrewEditDeleteTest`,** including the `404` cases of M1-16 for the new endpoints, so the committed `CrewAccessTest` stayed unchanged. A test-only red commit was enough: without the endpoints, every new test got `405`.
+
+**Learned**
+- **CI's Semgrep caught a `java.sql.Timestamp` cast in T3's M1-17 test** (JAVA-9, `no-legacy-date-types`). Fixed with approval in its own commit (`8eb25ee`): it reads `created_at` as `OffsetDateTime`, which pgjdbc supports, and converts it to `Instant`. **Semgrep now runs locally before every commit**, alongside `verify`.
+- **Red:** 15 new tests failed, all with `405`. **Green:** 95 tests, JaCoCo 99.7% lines, 90.0% branches; Semgrep 0 findings.
+- The VS Code Modulith plugin flags `shared` types as "non-exposed", but `shared` is an OPEN module; the build's `verify()` is the authority and passes.
+
 ## 2026-10-29 · M1 T3 done: create, list and view crews (T4 next)
 
 **Decided**
@@ -438,5 +452,5 @@ Decisions and context from planning sessions, so any new Claude Code session can
 
 ## Next steps
 
-1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T4 (edit and delete a crew) next.
+1. Build M1 task by task on `feat/m1-crews` (`docs/specs/m1-crews/tasks.md`): T5 (permanent deletion after 30 days) next.
 2. At the start of M2: re-check the Dependabot-ignored majors against the version rule (T17 entry, 2026-10-29).

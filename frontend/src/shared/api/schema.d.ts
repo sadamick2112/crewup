@@ -4,6 +4,34 @@
  */
 
 export interface paths {
+    "/api/crews/{crewId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a crew
+         * @description With the caller's own Member id and role.
+         */
+        get: operations["crew"];
+        /**
+         * Update a crew
+         * @description Administrators only. Replaces every field.
+         */
+        put: operations["update"];
+        post?: never;
+        /**
+         * Delete a crew
+         * @description Administrators only. Hidden at once, erased after 30 days. The name confirms the intent.
+         */
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/crews": {
         parameters: {
             query?: never;
@@ -48,31 +76,11 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/crews/{crewId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a crew
-         * @description With the caller's own Member id and role.
-         */
-        get: operations["crew"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        CreateCrewRequest: {
+        UpdateCrewRequest: {
             name: string;
             /** @example 1999-10 */
             establishedMonth: string;
@@ -82,7 +90,6 @@ export interface components {
             timeZone: string;
             motto?: string;
             description?: string;
-            creatorFirstName: string;
         };
         InvalidField: {
             /** @description The request property's path, such as socialLinks[0].url; empty for the whole request */
@@ -129,6 +136,18 @@ export interface components {
              */
             myRole: "ADMIN" | "FRIEND" | "NEW_GUY";
         };
+        CreateCrewRequest: {
+            name: string;
+            /** @example 1999-10 */
+            establishedMonth: string;
+            /** @enum {string} */
+            iconKey: "USERS" | "DICE" | "DINING" | "FILM" | "BEER" | "GAMEPAD" | "TROPHY" | "MUSIC" | "MOUNTAIN" | "TENT" | "PIZZA" | "COFFEE";
+            /** @example America/Chicago */
+            timeZone: string;
+            motto?: string;
+            description?: string;
+            creatorFirstName: string;
+        };
         UserProfile: {
             /** Format: uuid */
             id: string;
@@ -165,6 +184,192 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    crew: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                crewId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The crew */
+            200: {
+                headers: {
+                    /** @description Send back in If-Match to update it */
+                    ETag?: unknown;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrewDetails"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description No such crew, or the caller isn't a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The ETag from the last read of this crew */
+                "If-Match": string;
+            };
+            path: {
+                crewId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCrewRequest"];
+            };
+        };
+        responses: {
+            /** @description The updated crew */
+            200: {
+                headers: {
+                    /** @description Send back in If-Match to update it again */
+                    ETag?: unknown;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrewDetails"];
+                };
+            };
+            /** @description Invalid fields */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description The caller isn't an Administrator of this crew */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description No such crew, or the caller isn't a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Someone else changed the crew since the If-Match ETag was read */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description If-Match is missing */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query: {
+                /** @description The crew's current name, to confirm */
+                confirmName: string;
+            };
+            header?: never;
+            path: {
+                crewId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The crew is deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The confirmation doesn't match the crew's name */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description The caller isn't an Administrator of this crew */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description No such crew, or the caller isn't a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
     myCrews: {
         parameters: {
             query?: {
@@ -272,48 +477,6 @@ export interface operations {
             };
             /** @description Missing or invalid access token */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-        };
-    };
-    crew: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                crewId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The crew */
-            200: {
-                headers: {
-                    /** @description Send back in If-Match to update it */
-                    ETag?: unknown;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrewDetails"];
-                };
-            };
-            /** @description Missing or invalid access token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description No such crew, or the caller isn't a member */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -20,4 +20,9 @@ class CrewAccess {
         memberships.require(crewId);
         return true;
     }
+
+    /** A member without the role gets {@code false}, so {@code 403}: they already know the crew exists. */
+    public boolean isAdministrator(UUID crewId) {
+        return memberships.require(crewId).role() == MemberRole.ADMIN;
+    }
 }

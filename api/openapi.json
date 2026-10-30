@@ -11,6 +11,240 @@
     "bearerAuth" : [ ]
   } ],
   "paths" : {
+    "/api/crews/{crewId}" : {
+      "get" : {
+        "tags" : [ "Crews" ],
+        "summary" : "Get a crew",
+        "description" : "With the caller's own Member id and role.",
+        "operationId" : "crew",
+        "parameters" : [ {
+          "name" : "crewId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The crew",
+            "headers" : {
+              "ETag" : {
+                "description" : "Send back in If-Match to update it",
+                "style" : "simple"
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CrewDetails"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No such crew, or the caller isn't a member",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid access token",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Crews" ],
+        "summary" : "Update a crew",
+        "description" : "Administrators only. Replaces every field.",
+        "operationId" : "update",
+        "parameters" : [ {
+          "name" : "crewId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "description" : "The ETag from the last read of this crew",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateCrewRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "The updated crew",
+            "headers" : {
+              "ETag" : {
+                "description" : "Send back in If-Match to update it again",
+                "style" : "simple"
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CrewDetails"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid fields",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The caller isn't an Administrator of this crew",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No such crew, or the caller isn't a member",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "412" : {
+            "description" : "Someone else changed the crew since the If-Match ETag was read",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "428" : {
+            "description" : "If-Match is missing",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid access token",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Crews" ],
+        "summary" : "Delete a crew",
+        "description" : "Administrators only. Hidden at once, erased after 30 days. The name confirms the intent.",
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "crewId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "confirmName",
+          "in" : "query",
+          "description" : "The crew's current name, to confirm",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "The crew is deleted"
+          },
+          "400" : {
+            "description" : "The confirmation doesn't match the crew's name",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The caller isn't an Administrator of this crew",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No such crew, or the caller isn't a member",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid access token",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/crews" : {
       "get" : {
         "tags" : [ "Crews" ],
@@ -157,66 +391,11 @@
           }
         }
       }
-    },
-    "/api/crews/{crewId}" : {
-      "get" : {
-        "tags" : [ "Crews" ],
-        "summary" : "Get a crew",
-        "description" : "With the caller's own Member id and role.",
-        "operationId" : "crew",
-        "parameters" : [ {
-          "name" : "crewId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "format" : "uuid"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "The crew",
-            "headers" : {
-              "ETag" : {
-                "description" : "Send back in If-Match to update it",
-                "style" : "simple"
-              }
-            },
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CrewDetails"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "No such crew, or the caller isn't a member",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "401" : {
-            "description" : "Missing or invalid access token",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components" : {
     "schemas" : {
-      "CreateCrewRequest" : {
+      "UpdateCrewRequest" : {
         "type" : "object",
         "properties" : {
           "name" : {
@@ -247,14 +426,9 @@
             "type" : "string",
             "maxLength" : 2000,
             "minLength" : 0
-          },
-          "creatorFirstName" : {
-            "type" : "string",
-            "maxLength" : 50,
-            "minLength" : 0
           }
         },
-        "required" : [ "creatorFirstName", "establishedMonth", "iconKey", "name", "timeZone" ]
+        "required" : [ "establishedMonth", "iconKey", "name", "timeZone" ]
       },
       "InvalidField" : {
         "type" : "object",
@@ -346,6 +520,46 @@
           }
         },
         "required" : [ "description", "establishedMonth", "iconKey", "id", "motto", "myMemberId", "myRole", "name", "timeZone" ]
+      },
+      "CreateCrewRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "establishedMonth" : {
+            "type" : "string",
+            "example" : "1999-10",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          },
+          "iconKey" : {
+            "type" : "string",
+            "enum" : [ "USERS", "DICE", "DINING", "FILM", "BEER", "GAMEPAD", "TROPHY", "MUSIC", "MOUNTAIN", "TENT", "PIZZA", "COFFEE" ]
+          },
+          "timeZone" : {
+            "type" : "string",
+            "example" : "America/Chicago",
+            "minLength" : 1
+          },
+          "motto" : {
+            "type" : "string",
+            "maxLength" : 150,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          },
+          "creatorFirstName" : {
+            "type" : "string",
+            "maxLength" : 50,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "creatorFirstName", "establishedMonth", "iconKey", "name", "timeZone" ]
       },
       "UserProfile" : {
         "type" : "object",

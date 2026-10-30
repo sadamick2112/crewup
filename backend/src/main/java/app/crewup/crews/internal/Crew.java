@@ -57,6 +57,24 @@ class Crew {
         this.updatedBy = userId;
     }
 
+    void update(UpdateCrewRequest request, UUID userId, Instant now) {
+        this.name = request.name().trim();
+        this.establishedMonth = request.establishedMonth();
+        this.motto = Text.trimToNull(request.motto());
+        this.description = Text.trimToNull(request.description());
+        this.iconKey = request.iconKey();
+        this.timeZone = request.timeZone();
+        this.updatedAt = now;
+        this.updatedBy = userId;
+    }
+
+    /** Hides the crew from everyone; {@code CrewPurgeJob} erases it 30 days later (M1-6, M1-7). */
+    void delete(UUID userId, Instant now) {
+        this.deletedAt = now;
+        this.updatedAt = now;
+        this.updatedBy = userId;
+    }
+
     UUID getId() {
         return id;
     }

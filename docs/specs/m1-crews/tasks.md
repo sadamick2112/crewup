@@ -45,11 +45,11 @@ One task at a time (CLAUDE.md principles 5–7). Check a task off in its last co
 
 ### T4 · Edit and delete a crew 🔴→🟢 [plan §4.2, §4.3, §4.6]
 **Red**
-- [ ] Tests from plan §6 rows M1-5 (API) and M1-6 (API), and the 403 cases of M1-16 for these endpoints.
-- [ ] **Commit:** `test(crews): add failing tests for editing and deleting crews [GRP-2, GRP-3]`
+- [x] Tests from plan §6 rows M1-5 (API) and M1-6 (API), and the 403 cases of M1-16 for these endpoints.
+- [x] **Commit:** `test(crews): add failing tests for editing and deleting crews [GRP-2, GRP-3]`
 
 **Green**
-- [ ] `CrewAccess.isAdministrator`, `PUT` with `If-Match`, `DELETE` with `confirmName`, `ConfirmationMismatchException`.
+- [x] `CrewAccess.isAdministrator`, `PUT` with `If-Match`, `DELETE` with `confirmName`, `ConfirmationMismatchException`.
 
 **Done when:** tests pass; contract and client updated. **Commit:** `feat(crews): edit and delete crews [GRP-2, GRP-3]`
 
