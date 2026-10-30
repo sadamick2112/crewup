@@ -38,13 +38,19 @@ public class Cursors {
         }
     }
 
-    /** Stub until the next commit. */
+    /**
+     * How many rows to fetch for a page of {@code limit}: one extra, for {@link #page}. Checks the range itself rather
+     * than trusting the controller's {@code @Min}/{@code @Max}, so {@code limit + 1} can never overflow.
+     */
     public Limit fetchLimit(int limit) {
-        return Limit.unlimited();
+        if (limit < 1 || limit > MAX_LIMIT) {
+            throw new InvalidRequestException("limit", "Must be between 1 and " + MAX_LIMIT);
+        }
+        return Limit.of(limit + 1);
     }
 
     /**
-     * Builds a page from rows fetched with {@code limit + 1}: the extra row only shows that another page exists, and
+     * Builds a page from rows fetched with {@link #fetchLimit} ({@code limit + 1}): the extra row only shows that another page exists, and
      * the cursor is the key of the last row kept.
      */
     public <T> CursorPage<T> page(List<T> rows, int limit, Function<T, ?> keyOf) {

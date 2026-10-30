@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +48,7 @@ class CrewService {
     @Transactional(readOnly = true)
     CursorPage<CrewSummary> myCrews(UUID userId, String cursor, int limit) {
         CrewCursor after = cursors.decode(cursor, CrewCursor.class).orElse(FIRST_PAGE);
-        List<CrewOfUser> rows = crews.findCrewsOfUser(userId, after.sortName(), after.id(), Limit.of(limit + 1));
+        List<CrewOfUser> rows = crews.findCrewsOfUser(userId, after.sortName(), after.id(), cursors.fetchLimit(limit));
         CursorPage<CrewOfUser> page = cursors.page(
                 rows, limit, row -> new CrewCursor(row.sortName(), row.crew().getId()));
         return new CursorPage<>(page.items().stream().map(CrewSummary::from).toList(), page.nextCursor());

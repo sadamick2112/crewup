@@ -16,6 +16,7 @@ Decisions and context from planning sessions, so any new Claude Code session can
 **Learned**
 - **CI's Semgrep caught a `java.sql.Timestamp` cast in T3's M1-17 test** (JAVA-9, `no-legacy-date-types`). Fixed with approval in its own commit (`8eb25ee`): it reads `created_at` as `OffsetDateTime`, which pgjdbc supports, and converts it to `Instant`. **Semgrep now runs locally before every commit**, alongside `verify`.
 - **Red:** 15 new tests failed, all with `405`. **Green:** 95 tests, JaCoCo 99.7% lines, 90.0% branches; Semgrep 0 findings.
+- **CodeQL raised a high alert, `java/tainted-arithmetic` (CWE-190), on `Limit.of(limit + 1)` in `CrewService`.** It was unreachable, since the controller's `@Min(1) @Max(100)` returns `400` first, but CodeQL doesn't read Bean Validation. Fixed in code rather than dismissed, because every list would raise it again: `Cursors.fetchLimit(limit)` checks the range itself (same `400` on `limit`) and returns the `limit + 1` fetch size. Every paged service uses it from now on (red `456b21d`, then green).
 - The VS Code Modulith plugin flags `shared` types as "non-exposed", but `shared` is an OPEN module; the build's `verify()` is the authority and passes.
 
 ## 2026-10-29 · M1 T3 done: create, list and view crews (T4 next)
