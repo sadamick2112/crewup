@@ -22,7 +22,7 @@ services:
       retries: 10
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.8.1
+    image: quay.io/keycloak/keycloak:26.8.2-1
     # Dev mode with the committed realm. No data volume on purpose: after
     # `docker compose down`, the realm is re-imported fresh from infra/keycloak/.
     command: ["start-dev", "--import-realm"]
